@@ -1,18 +1,18 @@
 import { expect } from 'chai';
-import { Count, Count__factory } from '../typechain';
+import {WrapperFi, WrapperFi__factory} from '../typechain';
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 
 let deployer: SignerWithAddress;
-let count: Count;
+let wrap: WrapperFi;
 
-describe('Count', () => {
+describe('WrapperFi', () => {
   let snapshotId: number;
 
   before(async () => {
     [deployer] = await ethers.getSigners();
 
-    count = await new Count__factory(deployer).deploy();
+    wrap = await new WrapperFi__factory(deployer).deploy();
   });
 
   beforeEach(async () => {
@@ -23,7 +23,7 @@ describe('Count', () => {
     await ethers.provider.send('evm_revert', [snapshotId]);
   });
 
-  describe('#increment', () => {
+  /*describe('#increment', () => {
     it('should properly increment count', async () => {
       expect(await count.count()).to.eq(0);
       await count.increment();
@@ -32,5 +32,5 @@ describe('Count', () => {
       await count.increment();
       expect(await count.count()).to.eq(3);
     });
-  });
+  });*/
 });

@@ -43,10 +43,10 @@
 			margin-top: 5px;
 		}
 
-		.metadata {
-			animation-name: wiggle;
-			animation-duration: 3s;
-			animation-iteration-count: infinite;
+		@keyframes floating {
+			0% { transform: translate(0,  0px); }
+			50%  { transform: translate(0, 15px); }
+			100%   { transform: translate(0, -0px); }
 		}
 
 		.floatingdelay {
@@ -57,30 +57,11 @@
 			animation-timing-function: ease-in-out;
 		}
 
-		@keyframes floating {
-			0% { transform: translate(0,  0px); }
-			50%  { transform: translate(0, 15px); }
-			100%   { transform: translate(0, -0px); }
-		}
-
 		@keyframes floatingdelay {
 			0% { transform: translate(0, 0px);}
 			50%  { transform: translate(0, 30px); }
 			100%   { transform: translate(0, -0px); }
 		}
-
-		@keyframes wiggle {
-			0% { transform: translate(350px, 370px) rotate(0deg);}
-			40% { transform: translate(350px, 369px) rotate(1deg);}
-			50% { transform: translate(349px, 372px) rotate(-1deg);}
-			60% { transform: translate(346px, 371px) rotate(0deg);}
-			70% { transform: translate(353px, 371px) rotate(-1deg);}
-			80% { transform: translate(349px, 369px) rotate(1deg);}
-			90% { transform: translate(351px, 372px) rotate(0deg);}
-			100% { transform: translate(351px, 368px) rotate(-1deg);}
-		}
-
-
 	</style>
 	<rect class="st0" fill="url(#darkGradient)" stroke="url(#largeGradient)" rx="15" width="800" height="800"/>
 	<rect x="340.6" y="351" class="st6" width="211" height="147"/>
@@ -90,11 +71,12 @@
 			z"/>
 		<g class="floatingdelay">
 			<text transform="matrix(1 0 0 1 340.6391 363.6001)">
-				<tspan x="0" y="-20.2" class="st7 st8">CHAIN ID: 1</tspan>
-				<tspan x="0" y="20" class="st7 st8">ETHEREUM</tspan>
-				<tspan x="0" y="63.2" class="st7 st8">ETH &lt;-&gt; WETH</tspan>
-				<tspan x="0" y="106.4" class="st7 st8">NFT ID: 12345</tspan>
-				<tspan x="0" y="149.6" class="st7 st8" style="font-size: 14px; fill: none;">[ 11100001 11100001 11100001 ]</tspan>
+				<tspan x="0" y="-20.2" class="st7 st8">Sweet smelling</tspan>
+				<tspan x="0" y="20" class="st7 st8">Oozing</tspan>
+				<tspan x="0" y="63.2" class="st7 st8">Gummies</tspan>
+				<tspan x="0" y="100" class="st7 st8" style="font-size: 18px;">NFT ID: 12345</tspan>
+				<tspan x="0" y="120" class="st7 st8" style="font-size: 18px;">DAOs Registered: 0</tspan>
+				<tspan x="0" y="140" class="st7 st8" style="font-size: 14px; fill: none;">[ 11100001 11100001 11100001 ]</tspan>
 			</text>
 		</g>
 		<path id="st1" class="st1" d="M94.6,635c0,0-26.7-4.9-42.1-14.8s-33-26-30.9-30.9s21.7-9.8,61.1-28.1s92.7-49.2,127.8-48.4

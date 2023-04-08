@@ -20,7 +20,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
                                   ██░░░░      ░░░░░░██░░░░░░████
                                 ██░░░░          ░░░░░░██████
                                 ██░░          ░░  ░░░░██
-                                ██░░  WRAPPER🍬FI ░░░░██
+                                ██░░  WRAPPER FI  ░░░░██
                                 ██░░               ░░░██
                                 ██░░░░░░░░░░░░░░░░░░░░██
                             ██████░░░░░░░░░░░░░░░░░░░░██
@@ -33,29 +33,34 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
                                 ██████
 
 TODO:
-Add all colors wanted, in addition to a set of light hightlight colors for the 6th attribute
-
-Make sure can be minted (check Azuki contract)
-
-Think about whether a fixed 50,000 is desired, or if you want a way to modify the max
+Dutch Auction minting contract
 
 Consider getter and setter functions for things you want control over
 
-Consider ownerOnly methods on setter functions
-
 Make deployment javascript with randomvalues to pass in
 
-Format JSON string for metadata
+Background is a gradient for colors, maybe need map
 
-Check to see that base64 SVGs can be rendered at all (check that contract on twitter)
+ok - Make unrevealed state
 
-It is literally just ID * 3 and parse the next 3 bytes
+Make whitelist and dutch auction (like Azuki did it)
 
-DO SECOND STATE WITH METADATA THAT IS THERE FIRST, AND THE RANDOM CANDY FADES IN SECOND. STAYS for 20 seconds or so, fades out, repeat
+Could have candy name in text, with the other description being smaller, since its always the same
 
 ******************************************************************************************/
 
 contract CandyWrapper is ERC721A {
+
+    /** only used to limit the minting function **/
+    modifier callerIsUser() {
+        require(tx.origin == msg.sender, "The caller is another contract");
+        _;
+    }
+
+    modifier callerHasTokenID(uint16 tokenId) {
+        require(msg.sender == ownerOf(tokenId), "Not the owner");
+        _;
+    }
 
     bytes private candyBytes;
 
@@ -72,11 +77,32 @@ contract CandyWrapper is ERC721A {
         string[10] attributeWrapperBody;
         string[10] attributeWrapperStripes;
         string[10] attributeWrapperOuterBody;
-
+        string descriptorA;
+        string descriptorB;
+        string descriptorC;
         uint16 AUTHORIZATION;
+        bool reveal; //default false
     }
 
     Candy private candyCollection;
+
+    struct Vending {
+        uint32 auctionSaleStartTime;
+        uint32 publicSaleStartTime;
+        uint64 mintlistPrice;
+        uint64 publicPrice;
+        uint64 modePrice;
+        uint32 publicSaleKey;
+    }
+
+    Vending private vendingMachine;
+
+    /** when owning an NFT, the owner can set it to be a raster image hosted offchain, resets for the next owner **/
+    mapping(address => uint16) public rasterMap;
+
+    mapping(address => uint256) public allowlist;
+
+    mapping(uint16 => uint16) public daoRegistryCount; //not initialized
 
     constructor(bytes memory attributes) ERC721A("Candy", "CANDY"){
         //chain state
@@ -87,36 +113,68 @@ contract CandyWrapper is ERC721A {
         let key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
 
         //define attributes
+        string[10] memory attrBg = ["#FFCAEB", "#CCCFFF", "#CCFFF5", "#CCFFCC", "#FDFFCF",
+                                    "#FFCFCF", "#8AFF8D", "#8AEEFF", "#EB8AFF", "#E5E5E5"];
 
-        //st0 is background
-        //st1 is wrapper ends
-        //st2 is highlights
-        //st3 is wrapper body
-        //st4 is stripes
-        //st5 is wrapper outer body
+        /* bright contrasting colors */
+        string[10] memory attrWrapperEnds = ["#8086ff","#ff80e6","#80ffc8","#8cff80","#f5ff80",
+                                             "#f64444","#f444f6","#f6a044","#449cf6","#f644b1"];
 
-        string[10] memory attrBg = [
-        "#FFCAEB",
-        "#CCCFFF",
-        "#CCFFF5",
-        "#CCFFCC",
-        "#FDFFCF",
-        "#FFCFCF",
-        "#8AFF8D",
-        "#8AEEFF",
-        "#EB8AFF",
-        "#E5E5E5"
+        /* corresponds to background base color, a lighter version of it as if reflecting */
+        string[10] memory attrWrapperHighlights = ["#fcdef1", "#e6e8fe", "#ffffff", "#ffffff", "#ffffff",
+                                                   "#ffffff", "#c8ffc9", "#ffffff", "#f8d8ff", "#ffffff"];
+
+        string[10] memory attrWrapperBody = ["#fe7c84", "#e77cfe", "#7c82fe", "#7cfeea", "#7cfe7c",
+                                             "#e7fe7c", "#fecc7c", "#d49b68", "#65d46d", "#ff00f6"];
+        /* vibrant colors */
+        string[10] memory attrWrapperStripes = ["#e70095", "#007bff", "#d0001a", "#5ecf00", "#00e4b6",
+                                                "#00cfff", "#ff00ff", "#fff759", "#00ffff", "#b567eb"];
+
+        /* compliments body color */
+        string[10] memory attrWrapperOutline = ["#9c8b8c", "#ac9090", "#8c8d9e", "#919f9d", "#9ca99c",
+                                                "#aeb19e", "#a19e98", "#a9a39e", "#879388", "#a294a2"];
+
+        //descriptors
+        string[10] memory descriptorA = [
+        "Sugary",
+        "Chewy",
+        "Colorful",
+        "Flavorful",
+        "Delicious",
+        "Tasty",
+        "Sweet smelling",
+        "Gummy",
+        "Sticky",
+        "Soft",
+        "Mouth watering"
         ];
 
-        string[10] attrWrapperEnds = ["","","","","","","","","",""];
+        string[10] memory descriptorB = [
+        "Irresistible",
+        "Satisfying",
+        "Aromatic",
+        "Scrumptious",
+        "Delightful",
+        "Oozing",
+        "Juicy",
+        "Addictive",
+        "Fluffy",
+        "Rich"
+        ];
 
-        string[10] attrWrapperHighlights = [""];
+        string[10] memory descriptorC = [
+        "Sweets",
+        "Treats",
+        "Candies",
+        "Gumdrops",
+        "Suckers",
+        "Jawbreakers",
+        "Rock candy",
+        "Gummies",
+        "Chews",
+        "Jellies"
+        ];
 
-        string[10] attrWrapperBody = [""];
-
-        string[10] attrWrapperStripes = [""];
-
-        string[10] attrWrapperOutline = [""];
 
         //persist possible attributes
         candyCollection = Candy(
@@ -126,22 +184,36 @@ contract CandyWrapper is ERC721A {
                             attrWrapperBody,
                             attrWrapperStripes,
                             attrWrapperOutline,
-                            key & 0xffffffff //AUTHORIZATION variable
+                            descriptorA,
+                            descriptorB,
+                            descriptorC,
+                            key & 0xffffffff, //AUTHORIZATION variable
+                            false //not revealed state yet
                           );
 
         //set passed in attributes for the whole collection
         createCandyWrappers(attributes);
     }
 
+    /**
+     * @dev Calculates the index for a new token ID based on the next available ID.
+     * The index is determined by generating a random hash from the previous token ID and then
+     * taking the modulo of 10 to ensure that it falls within the range of possible indices.
+     * We use this for understanding getting random colors and attributes from the chosen index of the attribute arrays, for that specific tokenID()
+     * @return The index for the new token ID.
+     */
+    function indexFromTokenID(uint16 memory value) private view returns (uint) {
+        uint randomHash = uint(keccak256(value));
+        return randomHash % 10;
+    }
+
     // this should accept a string of indices. each set of attributes takes 3 bytes each, and
     function createCandyWrappers(bytes memory attributes) internal {
-
         candyBytes = attributes;
-
     }
 
     //unpack indices. three pairs of indices (6 indices) fit in 3 bytes
-    function unpackAttributes(uint256 startIndex) internal returns (bytes1[6] memory) {
+    function unpackAttributes(uint256 memory startIndex) internal returns (bytes1[6] memory) {
         require(startIndex + 3 <= candyBytes.length, "Index out of bounds");
 
         bytes1[3] memory attr;
@@ -159,7 +231,7 @@ contract CandyWrapper is ERC721A {
 
         return candyFeatures;
     }
-
+    /*** bit shifting methods ***/
     function binaryLeftShift(bytes1 a, uint8 n) internal pure returns (bytes1) {
         return a << n;
     }
@@ -177,13 +249,58 @@ contract CandyWrapper is ERC721A {
 
         return bytes1(z);
     }
+    /*** end bit shifting methods ***/
 
-    function mint(uint256 quantity) external payable {
-        // `_mint`'s second argument now takes in a `quantity`, not a `tokenId`.
+    /*function seedAllowlist(address[] memory addresses, uint256[] memory numSlots)
+    external
+    onlyOwner
+    {
+        require(
+            addresses.length == numSlots.length,
+            "addresses does not match numSlots length"
+        );
+        for (uint256 i = 0; i < addresses.length; i++) {
+            allowlist[addresses[i]] = numSlots[i];
+        }
+    }
+
+    function allowlistMint() external payable callerIsUser {
+        uint256 price = uint256(saleConfig.mintlistPrice);
+        require(price != 0, "allowlist sale has not begun yet");
+        require(allowlist[msg.sender] > 0, "not eligible for allowlist mint");
+        require(totalSupply() + 1 <= collectionSize, "reached max supply");
+        allowlist[msg.sender]--;
+        _safeMint(msg.sender, 1);
+        refundIfOver(price);
+    }*/
+
+
+    function mint(uint256 quantity) external payable callerIsUser {
+
+        SaleConfig memory config = saleConfig;
+        uint256 publicSaleKey = uint256(config.publicSaleKey);
+        uint256 publicPrice = uint256(config.publicPrice);
+        uint256 publicSaleStartTime = uint256(config.publicSaleStartTime);
+        require(
+            publicSaleKey == callerPublicSaleKey,
+            "called with incorrect public sale key"
+        );
+
+        require(
+            isPublicSaleOn(publicPrice, publicSaleKey, publicSaleStartTime),
+            "public sale has not begun yet"
+        );
+
         require(
             totalSupply() + quantity <= candyCollection.AUTHORIZATION,
             "Too much Candy."
         );
+
+        require(
+            numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
+            "Can not mint this many"
+        );
+
         _mint(msg.sender, quantity);
         refundIfOver(publicPrice * quantity);
     }
@@ -194,6 +311,22 @@ contract CandyWrapper is ERC721A {
             payable(msg.sender).transfer(msg.value - price);
         }
     }
+
+    function numberMinted(address owner) public view returns (uint256) {
+        return _numberMinted(owner);
+    }
+
+    function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
+    {
+        return ownershipOf(tokenId);
+    }
+
+    function reveal() external onlyOwner {
+        require(candyCollection.reveal == false, "Reveal event already occurred");
+        candyCollection.reveal = true;
+    }
+
+    /*** rescue functions ***/
 
     function withdrawMoney() external onlyOwner nonReentrant {
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
@@ -214,8 +347,93 @@ contract CandyWrapper is ERC721A {
         token.transfer(msg.sender, contractTokenBalance);
     }
 
-    function wrappedCandy(uint256 tokenId) public returns(string memory){
+    function updateAuthorization(uint16 session) external onlyOwner nonReentrant {
+        candyCollection.AUTHORIZATION += session;
+    }
 
+    /*** end rescue functions ***/
+
+    /*** attribute functions to publicly and programmatically retrieve attributes, for outside and community applications
+    * //st0 is background
+    * //st1 is wrapper ends
+    * //st2 is highlights
+    * //st3 is wrapper body
+    * //st4 is stripes
+    * //st5 is wrapper outer body
+    *
+    * redundant things are declared, but the user needs to be able to pass in a tokenId independently, which would be
+    * easier to acquire and find than a random index. they can simulate random indexes by sending in different tokenIds
+    ***/
+
+    function getBackground(uint16 tokenId) public view returns(string memory value){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
+        return candyCollection.attributeBackground(uint8(candyFeatures[0])); //needs to be a gradient or return two values
+    }
+
+    function getWrapperEnds(uint16 tokenId) public view returns(string memory value){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
+        return candyCollection.attributeWrapperEnds(uint8(candyFeatures[1]));
+    }
+
+    function getWrapperHighlights(uint16 tokenId) public view returns(string memory value){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
+        return candyCollection.attributeWrapperHighlights(uint8(candyFeatures[2]));
+    }
+
+    function getWrapperBody(uint16 tokenId) public view returns(string memory value){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
+        return candyCollection.attributeWrapperBody(uint8(candyFeatures[3]));
+    }
+
+    function getWrapperStripes(uint16 tokenId) public view returns(string memory value){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
+        return candyCollection.attributeWrapperStripes(uint8(candyFeatures[4]));
+    }
+
+    function getWrapperOuterBody(uint16 tokenId) public view returns(string memory value){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
+        return candyCollection.attributeWrapperOuterBody(uint8(candyFeatures[5]));
+    }
+
+    function getDescription(uint16 tokenId) public view returns(string memory value) {
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+
+        let memory index = indexFromTokenID(tokenId);
+
+        //can do even and odd variations here to add variation
+        return candyCollection.descriptorA[index] + " " +
+               candyCollection.descriptorB[tokenId % 2 ? index : indexFromTokenID(index)] + " " + //else condition is a derivative, for entropy
+               candyCollection.descriptorC[index];
+    }
+
+    /*** end attribute functions ***/
+
+    /*
+        Some platforms do not support SVG, this method allows switching to a raster image
+
+    */
+    function modePrice(uint256 price) external onlyOwner {
+        vendingMachine.modePrice = price;
+    }
+
+    function PFPMode(uint16 tokenId) external payable callerHasTokenID(tokenId) nonReentrant {
+        //add to PFP map
+        refundIfOver();
+    }
+
+    function SVGMode(uint16 tokenId) external payable callerHasTokenID(tokenId) nonReentrant {
+        //remove from PFP map
+        refundIfOver();
+    }
+
+    function wrappedCandy(uint16 tokenId) public view returns(string memory){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -224,18 +442,18 @@ contract CandyWrapper is ERC721A {
         //st5 is wrapper outer body
 
         //6 bytes of attribute indices
-        bytes1[6] memory candyFeatures = unpackAttributes(id * 3);
+        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
 
         bytes memory svg = abi.encodePacked(
             '<svg version="1.1" id="Layer_1" transform="rotate(-90)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">',
             '<style type="text/css">',
-            '.st0{fill:', candyCollection.attributeBackground[uint8(candyFeatures[0])],';}',
-            '.st1{fill:', candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])],';}',
-            '.st2{fill:', candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])],';}',
-            '.st3{fill:', candyCollection.attributeWrapperBody[uint8(candyFeatures[3])],';}',
-            '.st4{fill:', candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])],';}',
-            '.st5{opacity:0.5;fill:', candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])],';enable-background:new    ;}',
-            '</style>',
+            '.st0{fill:', candyCollection.reveal ? candyCollection.attributeBackground[uint8(candyFeatures[0])] : '#FFFFFF',';}',
+            '.st1{fill:', candyCollection.reveal ? candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])]:'#000000',';}',
+            '.st2{fill:', candyCollection.reveal ? candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])]:'#FFFFFF',';}',
+            '.st3{fill:', candyCollection.reveal ? candyCollection.attributeWrapperBody[uint8(candyFeatures[3])]:'#000000',';}',
+            '.st4{fill:', candyCollection.reveal ? candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])]:'#000000',';}',
+            '.st5{opacity:0.5;fill:', candyCollection.reveal ? candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])]:'#000000',';enable-background:new    ;}',
+            '</style>', //white ? question mark for unrevealed tokens, hide hover layer
             '<rect class="st0" width="800" height="800"/>',
             '<path class="st1" d="M94.6,635c0,0-26.7-4.9-42.1-14.8s-33-26-30.9-30.9c2.1-4.9,21.7-9.8,61.1-28.1s92.7-49.2,127.8-48.4 s52.7,14.1,52.7,14.1s62.4,37.8,56.6,109.4c-4.7,58.1-24.1,84.1-41.1,115.9c-7.1,13.3-7.8,29.7-14.9,31.1c-7,1.4-18.4-6.9-26-13.4 c-12.8-10.9-20.5-34.1-36.9-43.3s-41.4-9.2-62.3-24.1C100,674.9,94.6,635,94.6,635z"/>',
             '<path class="st2" d="M82,593.2c-0.6,5.7,14.6,13.4,25.3,12.2s27.8-10.3,49.8-20.7c26-12.2,62.4-21.4,59.7-32.9 c-2.7-11.5-38.6-2.3-66.2,7.6C123,569.5,82.8,586,82,593.2z M215.6,618.6c-4.5-9.3-24.9-5-49.8,2.3s-36.7,11.9-39.4,26 c-2.7,13.8,5.4,23.3,15.7,30.6s22.6,12.6,29.4,12.3c6.9-0.4,11.5-2.3,15.7-12.6c2.5-6.2,5.5-15.6,11.5-24.9 C205.6,641.6,220.6,629,215.6,618.6L215.6,618.6z M228.1,732.5c0,10,13,26.8,22.6,23.8c10.8-3.4,10.1-26.7,15.7-54.3 c8.8-43.6,18.9-70.2,6.1-74.2c-8.4-2.7-22.6,32.5-29.9,53.9C237.3,697.7,228.1,720.3,228.1,732.5L228.1,732.5z"/>',
@@ -255,8 +473,9 @@ contract CandyWrapper is ERC721A {
         );
     }
 
-    function getTokenURI(uint256 tokenId) public returns (string memory){
-
+    //on PFPMode, use super
+    function tokenURI(uint16 tokenId) override public view returns (string memory){
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -270,33 +489,41 @@ contract CandyWrapper is ERC721A {
 
         bytes memory dataURI = abi.encodePacked(
             '{',
-            '"name": "Candy Wrap #', tokenId.toString(), '",',
+            '"name": "🍬', tokenId.toString(), ' ', getDescription(), '",',
             '"description": "Candy",',
             '"image": "', wrappedCandy(tokenId), '"',
             '"attributes": [',
                 '{',
+                    '"trait_type": "Name"',
+                    '"value": "', getDescription(), '"'
+                '},',
+                '{',
                     '"trait_type": "Background"',
-                    '"value": "', candyCollection.attributeBackground[uint8(candyFeatures[0])], '"'
+                    '"value": "', candyCollection.reveal ? candyCollection.attributeBackground[uint8(candyFeatures[0])] : "#FFFFFF", '"'
                 '},',
                 '{',
                     '"trait_type": "Twist Ties"',
-                    '"value": "', candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])], '"'
+                    '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])] : "#000000", '"'
                 '},'
                 '{',
                     '"trait_type": "Accent"',
-                    '"value": "', candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])], '"'
+                    '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])] : "#000000", '"'
                 '},'
                 '{',
                     '"trait_type": "Body"',
-                    '"value": "', candyCollection.attributeWrapperBody[uint8(candyFeatures[3])], '"'
+                    '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperBody[uint8(candyFeatures[3])] : "#000000", '"'
                 '},'
                 '{',
                     '"trait_type": "Stripes"',
-                    '"value": "', candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])], '"'
+                    '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])] : "#000000", '"'
                 '},'
                 '{',
                     '"trait_type": "Outline"',
-                    '"value": "', candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])], '"'
+                    '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])] : "#000000", '"'
+                '},'
+                '{',
+                    '"trait_type": "DAOs Registered"',
+                    '"value": "', candyCollection.daoRegistryCount[tokenId], '"'
                 '},'
 
         );

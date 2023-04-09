@@ -71,7 +71,7 @@ contract CandyWrapper is ERC721A {
     //st4 is stripes
     //st5 is wrapper outer body
     struct Candy {
-        string[10] attributeBackground;
+        mapping(uint8 => string[2]) attributeBackground;
         string[10] attributeWrapperEnds;
         string[10] attributeWrapperHighlights;
         string[10] attributeWrapperBody;
@@ -98,14 +98,21 @@ contract CandyWrapper is ERC721A {
     Vending private vendingMachine;
 
     /** when owning an NFT, the owner can set it to be a raster image hosted offchain, resets for the next owner **/
-    mapping(address => uint16) public rasterMap;
+    // Store tokenId => owner relationship
+    mapping(uint16 => address) public tokenIdToOwner;
+
+    // Store owner => tokenIds relationship
+
+    mapping(address => uint16[]) public rasterMap;
+    mapping(address => mapping(uint16 => uint256)) private ownerTokenIdToIndex;
+
+    /** end relational ownership for offchain switch **/
 
     mapping(address => uint256) public allowlist;
 
     mapping(uint16 => uint16) public daoRegistryCount; //not initialized
 
     constructor(bytes memory attributes) ERC721A("Candy", "CANDY"){
-        //chain state
         assembly {
             let image := or(shl(16, shl(6, 1)), 0xC350)
             mstore(0x40, image)
@@ -113,8 +120,17 @@ contract CandyWrapper is ERC721A {
         let key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
 
         //define attributes
-        string[10] memory attrBg = ["#FFCAEB", "#CCCFFF", "#CCFFF5", "#CCFFCC", "#FDFFCF",
-                                    "#FFCFCF", "#8AFF8D", "#8AEEFF", "#EB8AFF", "#E5E5E5"];
+        mapping(uint8 => string[2]) memory attrBg;
+                                attrBg[0] = ["#0b2d13", "#79c98c"]; //dark color, light color
+                                attrBg[1] = ["#682850", "#FFCAEB"];
+                                attrBg[2] = ["#303470", "#CCCFFF"];
+                                attrBg[3] = ["#306a5f", "#CCFFF5"];
+                                attrBg[4] = ["#2f692f", "#CCFFCC"];
+                                attrBg[5] = ["#67692f", "#FDFFCF"];
+                                attrBg[6] = ["#692f2f", "#FFCFCF"];
+                                attrBg[7] = ["#2f6930", "#8AFF8D"];
+                                attrBg[8] = ["#2f6169", "#8AEEFF"];
+                                attrBg[9] = ["#5f2f69", "#EB8AFF"];
 
         /* bright contrasting colors */
         string[10] memory attrWrapperEnds = ["#8086ff","#ff80e6","#80ffc8","#8cff80","#f5ff80",
@@ -249,6 +265,15 @@ contract CandyWrapper is ERC721A {
 
         return bytes1(z);
     }
+
+    function bytesToBinaryString(bytes1 b) internal pure returns (string memory) {
+        bytes memory result = new bytes(8);
+        for (uint8 i = 0; i < 8; i++) {
+            result[i] = (b & (2 ** (7 - i))) != 0 ? "1" : "0";
+        }
+        return string(result);
+    }
+
     /*** end bit shifting methods ***/
 
     /*function seedAllowlist(address[] memory addresses, uint256[] memory numSlots)
@@ -365,7 +390,7 @@ contract CandyWrapper is ERC721A {
     * easier to acquire and find than a random index. they can simulate random indexes by sending in different tokenIds
     ***/
 
-    function getBackground(uint16 tokenId) public view returns(string memory value){
+    function getBackground(uint16 tokenId) public view returns(string[2] memory value){
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
         bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
         return candyCollection.attributeBackground(uint8(candyFeatures[0])); //needs to be a gradient or return two values
@@ -422,14 +447,32 @@ contract CandyWrapper is ERC721A {
         vendingMachine.modePrice = price;
     }
 
-    function PFPMode(uint16 tokenId) external payable callerHasTokenID(tokenId) nonReentrant {
-        //add to PFP map
-        refundIfOver();
+    /*
+        offchain mode, usable for displaying on other PFP platforms that don't support SVGs
+    */
+    function rasterMode(uint16 tokenId) external payable callerIsUser callerHasTokenID(tokenId) nonReentrant {
+        //add to rasterMap
+        rasterMap[msg.sender].push(tokenId);
+        ownerTokenIdToIndex[msg.sender][tokenId] = rasterMap[msg.sender].length - 1;
+        refundIfOver(vendingMachine.modePrice);
     }
 
-    function SVGMode(uint16 tokenId) external payable callerHasTokenID(tokenId) nonReentrant {
-        //remove from PFP map
-        refundIfOver();
+    /*
+        onchain mode
+    */
+    function vectorMode(uint16 tokenId) external payable callerIsUser callerHasTokenID(tokenId) nonReentrant {
+        //remove from rasterMap
+
+        uint256 indexToRemove = ownerTokenIdToIndex[msg.sender][tokenId];
+        uint16 lastTokenId = ownerToTokenIds[msg.sender][ownerToTokenIds[msg.sender].length - 1];
+
+        ownerToTokenIds[msg.sender][indexToRemove] = lastTokenId;
+        ownerTokenIdToIndex[msg.sender][lastTokenId] = indexToRemove;
+        ownerToTokenIds[msg.sender].pop();
+
+        delete ownerTokenIdToIndex[msg.sender][tokenId];
+
+        refundIfOver(vendingMachine.modePrice);
     }
 
     function wrappedCandy(uint16 tokenId) public view returns(string memory){

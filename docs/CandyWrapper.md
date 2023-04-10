@@ -161,6 +161,24 @@ function balanceOf(address owner) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### config
+
+```solidity
+function config(uint8 control, uint16 session, string baseURI) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| control | uint8 | undefined |
+| session | uint16 | undefined |
+| baseURI | string | undefined |
+
 ### endAuctionAndSetupNonAuctionSaleInfo
 
 ```solidity
@@ -473,10 +491,10 @@ function safeTransferFrom(address from, address to, uint256 tokenId, bytes _data
 | tokenId | uint256 | undefined |
 | _data | bytes | undefined |
 
-### seedAllowlistAndReferrals
+### seedAllowlist
 
 ```solidity
-function seedAllowlistAndReferrals(bool referrals, address[] addresses, uint16[] numSlots) external nonpayable
+function seedAllowlist(bool referrals, address[] addresses, uint16[] numSlots) external nonpayable
 ```
 
 
@@ -523,22 +541,6 @@ function setAuctionSaleStartTime(uint32 timestamp) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | timestamp | uint32 | undefined |
-
-### setBaseURI
-
-```solidity
-function setBaseURI(string baseURI) external nonpayable
-```
-
-end relational ownership for offchain switch *
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| baseURI | string | undefined |
 
 ### setdaoRegistry
 
@@ -668,22 +670,6 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined |
-
-### updateAuthorization
-
-```solidity
-function updateAuthorization(uint16 session) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| session | uint16 | undefined |
 
 ### withdrawMoney
 

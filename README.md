@@ -8,7 +8,7 @@ The NFT collection is completely onchain and interactive using SVGs. Incorporate
 
 `npx hardhat compile`
 
-Compiling CandyWrapper.sol requires the ViaIR: true setting enabled in hardhat.config.ts, otherwise the normal solidity compiler will return Stack Too Deep
+Compiling CandyWrapper.sol requires the yulDetails: { optimizerSteps: "u" },setting enabled in hardhat.config.ts, otherwise the normal solidity compiler will return Stack Too Deep. Does not require viaIR: true despite the hardhat/solidity compiler suggesting that solution
 
 TODO:
 
@@ -24,6 +24,4 @@ TODO:
 
 - [x] '"image": "', true ? super.tokenURI(tokenId) :  make toggle
 
-- [ ] due to space concerns, have to set uri in the constructor, setup IPFS in advance then
-
-- [ ] configure Candy struct related to auction and increased authorization
+- [x] configure Candy struct related to auction and increased authorization, put baseUri in there

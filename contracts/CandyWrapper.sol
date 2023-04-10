@@ -37,11 +37,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 TODO:
 Dutch Auction minting contract
 
-Make deployment javascript with randomvalues to pass in
-
 Make whitelist and dutch auction (like Azuki did it)
-
-Manual batch DAO registry update (tokenId, value), onlyOwner
 
 Dev mint
 Foundation mint
@@ -95,10 +91,10 @@ contract CandyWrapper is ERC721A, Ownable {
 
     Candy private candyCollection;
 
-    /** end relational ownership for offchain switch **/
-
-    function setBaseURI(string memory baseURI) external onlyOwner {
-        candyCollection.baseTokenURI = baseURI;
+    /*** can be general config function **/
+    function config(uint8 control, uint16 session, string memory baseURI) external onlyOwner {
+        if(control == 1) candyCollection.AUTHORIZATION += session;
+        else if(control == 2) candyCollection.baseTokenURI = baseURI;
     }
 
     function setdaoRegistry(uint16[] calldata tokenId, uint8[] calldata count) external onlyOwner {
@@ -194,9 +190,7 @@ contract CandyWrapper is ERC721A, Ownable {
         return string(result);
     }
 
-    /*** end bit shifting methods ***/
-
-    function seedAllowlistAndReferrals(bool referrals, address[] memory addresses, uint16[] memory numSlots) external onlyOwner
+    function seedAllowlist(bool referrals, address[] memory addresses, uint16[] memory numSlots) external onlyOwner
     {
         require(
             addresses.length == numSlots.length,
@@ -339,10 +333,6 @@ contract CandyWrapper is ERC721A, Ownable {
             require(success, "Transfer failed.");
             candyCollection.reveal = true;
         }
-    }
-
-    function updateAuthorization(uint16 session) external onlyOwner {
-        candyCollection.AUTHORIZATION += session;
     }
 
     /*** end rescue functions ***/

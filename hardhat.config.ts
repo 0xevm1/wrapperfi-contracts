@@ -8,6 +8,7 @@ import "hardhat-gas-reporter";
 import "@primitivefi/hardhat-dodoc";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
+import 'hardhat-tracer';
 
 dotenv.config();
 
@@ -129,7 +130,12 @@ const config: HardhatUserConfig = {
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
         enabled: true,
-        runs: 490,
+        runs: 1,
+        details: {
+          yulDetails: {
+            optimizerSteps: "u",
+          },
+        },
       },
     },
   },
@@ -162,15 +168,20 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    coinmarketcap: process.env.REPORT_GAS_COINMARKETCAP_API_KEY,
     currency: "USD",
-    enabled: process.env.REPORT_GAS ? true : false,
+    enabled: true //process.env.REPORT_GAS ? true : false,
   },
   dodoc: {
     runOnCompile: true,
     exclude: ["**/node_modules/**"],
     keepFileStructure: false,
   },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+  }
 };
 
 if (testPrivateKey) {

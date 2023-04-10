@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",
-    "@primitivefi/hardhat-dodoc": "^0.2.3"
+    "@primitivefi/hardhat-dodoc": "^0.2.3",
+    "hardhat-tracer": "^2.2.2"
   }
 }

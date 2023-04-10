@@ -99,18 +99,18 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     /** when owning an NFT, the owner can set it to be a raster image hosted offchain, resets for the next owner **/
     // Store tokenId => owner relationship
-    mapping(uint16 => address) public tokenIdToOwner;
+    //mapping(uint16 => address) public tokenIdToOwner;
 
     // Store owner => tokenIds relationship
 
-    mapping(address => uint16[]) public rasterMap;
-    mapping(address => mapping(uint16 => uint256)) private ownerTokenIdToIndex;
+    //mapping(address => uint16[]) public rasterMap;
+    //mapping(address => mapping(uint16 => uint256)) private ownerTokenIdToIndex;
 
     /** end relational ownership for offchain switch **/
 
-    mapping(address => uint256) public allowlist;
+    //mapping(address => uint256) public allowlist;
 
-    mapping(uint16 => uint16) public daoRegistryCount; //not initialized
+    //mapping(uint16 => uint16) public daoRegistryCount; //not initialized
 
     // // metadata URI
     string private _baseTokenURI;
@@ -125,11 +125,15 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
 
     constructor(bytes memory attributes) ERC721A("Candy", "CANDY"){
-        assembly {
+        /*assembly {
             let image := or(shl(16, shl(6, 1)), 0xC350)
             mstore(0x40, image)
         }
-        uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
+        uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;*/
+
+        //set passed in attributes for the whole collection
+        candyBytes = attributes;
+
 
         //define attributes
         candyCollection.attributeBackground[0] = ["#0b2d13", "#79c98c"]; //dark color, light color
@@ -143,21 +147,21 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         candyCollection.attributeBackground[8] = ["#2f6169", "#8AEEFF"];
         candyCollection.attributeBackground[9] = ["#5f2f69", "#EB8AFF"];
 
-        /* bright contrasting colors */
+        // bright contrasting colors
         candyCollection.attributeWrapperEnds = ["#8086ff","#ff80e6","#80ffc8","#8cff80","#f5ff80",
                                                 "#f64444","#f444f6","#f6a044","#449cf6","#f644b1"];
 
-        /* corresponds to background base color, a lighter version of it as if reflecting */
+        // corresponds to background base color, a lighter version of it as if reflecting
         candyCollection.attributeWrapperHighlights = ["#fcdef1", "#e6e8fe", "#ffffff", "#ffffff", "#ffffff",
                                                       "#ffffff", "#c8ffc9", "#ffffff", "#f8d8ff", "#ffffff"];
 
         candyCollection.attributeWrapperBody = ["#fe7c84", "#e77cfe", "#7c82fe", "#7cfeea", "#7cfe7c",
                                                 "#e7fe7c", "#fecc7c", "#d49b68", "#65d46d", "#ff00f6"];
-        /* vibrant colors */
+        // vibrant colors
         candyCollection.attributeWrapperStripes =  ["#e70095", "#007bff", "#d0001a", "#5ecf00", "#00e4b6",
                                                     "#00cfff", "#ff00ff", "#fff759", "#00ffff", "#b567eb"];
 
-        /* compliments body color */
+        // compliments body color
         candyCollection.attributeWrapperOuterBody = ["#9c8b8c", "#ac9090", "#8c8d9e", "#919f9d", "#9ca99c",
                                                      "#aeb19e", "#a19e98", "#a9a39e", "#879388", "#a294a2"];
 
@@ -195,11 +199,9 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                                         "Chews",
                                         "Jellies"];
 
-        candyCollection.AUTHORIZATION = uint16(key & 0xffffffff); //AUTHORIZATION variable
+        //candyCollection.AUTHORIZATION = uint16(key & 0xffffffff); //AUTHORIZATION variable
         candyCollection.reveal = false;
 
-        //set passed in attributes for the whole collection
-        createCandyWrappers(attributes);
     }
 
     /**
@@ -212,11 +214,6 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     function indexFromTokenID(uint16 value) private pure returns (uint16) {
         uint256 randomHash = uint256(keccak256(abi.encodePacked(value)));
         return uint16(randomHash % 10);
-    }
-
-    // this should accept a string of indices. each set of attributes takes 3 bytes each, and
-    function createCandyWrappers(bytes memory attributes) internal {
-        candyBytes = attributes;
     }
 
     //unpack indices. three pairs of indices (6 indices) fit in 3 bytes
@@ -239,9 +236,6 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         return candyFeatures;
     }
     /*** bit shifting methods ***/
-    function binaryLeftShift(bytes1 a, uint8 n) internal pure returns (bytes1) {
-        return a << n;
-    }
 
     function binaryRightShift(bytes1 a, uint8 n) internal pure returns (bytes1){
         return a >> n;
@@ -323,7 +317,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     }
 
     function refundIfOver(uint256 price) private {
-        require(msg.value >= price, "Need to send more ETH.");
+        require(msg.value >= price, "Need to send more ETH."); //if message value is greater than or equal to price, run refund. else, don't run refund because its the correct amount
         if (msg.value > price) {
             payable(msg.sender).transfer(msg.value - price);
         }
@@ -364,9 +358,9 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         token.transfer(msg.sender, contractTokenBalance);
     }
 
-    function updateAuthorization(uint16 session) external onlyOwner nonReentrant {
+    /*function updateAuthorization(uint16 session) external onlyOwner nonReentrant {
         candyCollection.AUTHORIZATION += session;
-    }
+    }*/
 
     /*** end rescue functions ***/
 
@@ -445,16 +439,13 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     /*
         offchain mode, usable for displaying on other PFP platforms that don't support SVGs
     */
-    function rasterMode(uint16 tokenId) external payable callerIsUser callerHasTokenID(tokenId) nonReentrant {
+    /*function rasterMode(uint16 tokenId) external payable callerIsUser callerHasTokenID(tokenId) nonReentrant {
         //add to rasterMap
         rasterMap[msg.sender].push(tokenId);
         ownerTokenIdToIndex[msg.sender][tokenId] = rasterMap[msg.sender].length - 1;
         refundIfOver(vendingMachine.modePrice);
     }
 
-    /*
-        onchain mode
-    */
     function vectorMode(uint16 tokenId) external payable callerIsUser callerHasTokenID(tokenId) nonReentrant {
         //remove from rasterMap
 
@@ -468,7 +459,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         delete ownerTokenIdToIndex[msg.sender][tokenId];
 
         refundIfOver(vendingMachine.modePrice);
-    }
+    }*/
 
     /**
      * @dev Returns an SVG string representation of the candy associated with the given tokenId.

@@ -10,28 +10,6 @@
 
 ## Methods
 
-### allowlist
-
-```solidity
-function allowlist(address) external view returns (uint256)
-```
-
-end relational ownership for offchain switch *
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### approve
 
 ```solidity
@@ -70,28 +48,6 @@ function balanceOf(address owner) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### daoRegistryCount
-
-```solidity
-function daoRegistryCount(uint16) external view returns (uint16)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
 
 ### getApproved
 
@@ -424,45 +380,6 @@ function ownerOf(uint256 tokenId) external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
-### rasterMap
-
-```solidity
-function rasterMap(address, uint256) external view returns (uint16)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-| _1 | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-### rasterMode
-
-```solidity
-function rasterMode(uint16 tokenId) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
-
 ### renounceOwnership
 
 ```solidity
@@ -594,28 +511,6 @@ function symbol() external view returns (string)
 |---|---|---|
 | _0 | string | undefined |
 
-### tokenIdToOwner
-
-```solidity
-function tokenIdToOwner(uint16) external view returns (address)
-```
-
-when owning an NFT, the owner can set it to be a raster image hosted offchain, resets for the next owner *
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
 ### tokenURI
 
 ```solidity
@@ -688,38 +583,6 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined |
-
-### updateAuthorization
-
-```solidity
-function updateAuthorization(uint16 session) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| session | uint16 | undefined |
-
-### vectorMode
-
-```solidity
-function vectorMode(uint16 tokenId) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
 
 ### withdrawERC20Token
 

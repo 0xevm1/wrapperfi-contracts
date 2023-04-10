@@ -6,4 +6,16 @@ The NFT collection is completely onchain and interactive using SVGs. Incorporate
 
 <img width="400" height="400" src="https://raw.githubusercontent.com/Wrapper-Fi/wrapperfi-contracts/a7c56a4ba92d583fa5d7f0d9b13f6a6ae9e409e1/contracts/CandyWrapper-basevectors.svg">
 
-Compiling CandyWrapper.sol requires the ViaIR: true setting enabled in hardhat
+`npx hardhat compile`
+
+Compiling CandyWrapper.sol requires the ViaIR: true setting enabled in hardhat.config.ts, otherwise the normal solidity compiler will return Stack Too Deep
+
+TODO:
+
+- [ ] maybe a switch from vector mode to raster mode, for an individual tokenID
+
+- [ ] daoRegistery map, settable by onlyOwner. imports and updates how many referrals have been accomplished.
+
+- [ ] dutch auction contracts, and reserved whitelist at half of initial dutch auction price
+
+- [ ] do deployment scripts

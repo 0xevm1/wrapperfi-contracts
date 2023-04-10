@@ -10,6 +10,91 @@
 
 ## Methods
 
+### AUCTION_DROP_INTERVAL
+
+```solidity
+function AUCTION_DROP_INTERVAL() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### AUCTION_DROP_PER_STEP
+
+```solidity
+function AUCTION_DROP_PER_STEP() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### AUCTION_END_PRICE
+
+```solidity
+function AUCTION_END_PRICE() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### AUCTION_PRICE_CURVE_LENGTH
+
+```solidity
+function AUCTION_PRICE_CURVE_LENGTH() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### AUCTION_START_PRICE
+
+```solidity
+function AUCTION_START_PRICE() external view returns (uint256)
+```
+
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
 ### allowlistMint
 
 ```solidity
@@ -38,6 +123,22 @@ function approve(address to, uint256 tokenId) external payable
 | to | address | undefined |
 | tokenId | uint256 | undefined |
 
+### auctionMint
+
+```solidity
+function auctionMint(uint256 quantity) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| quantity | uint256 | undefined |
+
 ### balanceOf
 
 ```solidity
@@ -60,6 +161,24 @@ function balanceOf(address owner) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### endAuctionAndSetupNonAuctionSaleInfo
+
+```solidity
+function endAuctionAndSetupNonAuctionSaleInfo(uint64 mintlistPriceWei, uint64 publicPriceWei, uint32 publicSaleStartTime) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| mintlistPriceWei | uint64 | undefined |
+| publicPriceWei | uint64 | undefined |
+| publicSaleStartTime | uint32 | undefined |
+
 ### getApproved
 
 ```solidity
@@ -81,6 +200,28 @@ function getApproved(uint256 tokenId) external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
+
+### getAuctionPrice
+
+```solidity
+function getAuctionPrice(uint256 _saleStartTime) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _saleStartTime | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### getBackground
 
@@ -172,6 +313,30 @@ function isApprovedForAll(address owner, address operator) external view returns
 |---|---|---|
 | _0 | bool | undefined |
 
+### isPublicSaleOn
+
+```solidity
+function isPublicSaleOn(uint256 publicPriceWei, uint256 publicSaleKey, uint256 publicSaleStartTime) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| publicPriceWei | uint256 | undefined |
+| publicSaleKey | uint256 | undefined |
+| publicSaleStartTime | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### mint
 
 ```solidity
@@ -187,22 +352,6 @@ function mint(uint256 quantity) external payable
 | Name | Type | Description |
 |---|---|---|
 | quantity | uint256 | undefined |
-
-### modePrice
-
-```solidity
-function modePrice(uint256 price) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| price | uint256 | undefined |
 
 ### name
 
@@ -260,6 +409,22 @@ function ownerOf(uint256 tokenId) external view returns (address)
 |---|---|---|
 | _0 | address | undefined |
 
+### renderMode
+
+```solidity
+function renderMode(uint16 tokenId) external payable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenId | uint16 | undefined |
+
 ### renounceOwnership
 
 ```solidity
@@ -269,17 +434,6 @@ function renounceOwnership() external nonpayable
 
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
-
-
-### reveal
-
-```solidity
-function reveal() external nonpayable
-```
-
-
-
-
 
 
 ### safeTransferFrom
@@ -319,10 +473,10 @@ function safeTransferFrom(address from, address to, uint256 tokenId, bytes _data
 | tokenId | uint256 | undefined |
 | _data | bytes | undefined |
 
-### seedAllowlist
+### seedAllowlistAndReferrals
 
 ```solidity
-function seedAllowlist(address[] addresses, uint256[] numSlots) external nonpayable
+function seedAllowlistAndReferrals(bool referrals, address[] addresses, uint16[] numSlots) external nonpayable
 ```
 
 
@@ -333,8 +487,9 @@ function seedAllowlist(address[] addresses, uint256[] numSlots) external nonpaya
 
 | Name | Type | Description |
 |---|---|---|
+| referrals | bool | undefined |
 | addresses | address[] | undefined |
-| numSlots | uint256[] | undefined |
+| numSlots | uint16[] | undefined |
 
 ### setApprovalForAll
 
@@ -353,10 +508,10 @@ function setApprovalForAll(address operator, bool approved) external nonpayable
 | operator | address | undefined |
 | approved | bool | undefined |
 
-### setBaseURI
+### setAuctionSaleStartTime
 
 ```solidity
-function setBaseURI(string baseURI) external nonpayable
+function setAuctionSaleStartTime(uint32 timestamp) external nonpayable
 ```
 
 
@@ -367,7 +522,40 @@ function setBaseURI(string baseURI) external nonpayable
 
 | Name | Type | Description |
 |---|---|---|
+| timestamp | uint32 | undefined |
+
+### setBaseURI
+
+```solidity
+function setBaseURI(string baseURI) external nonpayable
+```
+
+end relational ownership for offchain switch *
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
 | baseURI | string | undefined |
+
+### setdaoRegistry
+
+```solidity
+function setdaoRegistry(uint16[] tokenId, uint8[] count) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenId | uint16[] | undefined |
+| count | uint8[] | undefined |
 
 ### supportsInterface
 
@@ -516,7 +704,7 @@ function withdrawMoney(address tokenAddress) external nonpayable
 ### wrappedCandy
 
 ```solidity
-function wrappedCandy(uint16 tokenId) external view returns (bytes)
+function wrappedCandy(uint16 tokenId) external view returns (string)
 ```
 
 
@@ -533,7 +721,7 @@ function wrappedCandy(uint16 tokenId) external view returns (bytes)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | bytes | A bytes containing the SVG data for the candy associated with the tokenId, in base64 format |
+| _0 | string | A bytes containing the SVG data for the candy associated with the tokenId, in base64 format |
 
 
 

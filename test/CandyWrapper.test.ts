@@ -66,8 +66,14 @@ describe("CandyWrapper", function () {
             expect(await candyWrapper.symbol()).to.equal("CANDY");
         });
 
-        /*it("Should store the attributes in the contract", async function () {
-           // expect(await candyWrapper.attributes()).to.equal(ATTRIBUTES);
+        /*it("Should return random values by tokenId", async function () {
+
+            let indexA = await candyWrapper.getSixRandomValues(0);
+            let indexB = await candyWrapper.getSixRandomValues(1);
+            console.log("indexA: ", indexA);
+            console.log("indexB: ", indexB);
+
+           expect(indexA).to.not.deep.equal(indexB);
         });*/
     });
 

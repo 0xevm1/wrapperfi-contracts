@@ -12,9 +12,9 @@ Compiling CandyWrapper.sol requires the ViaIR: true setting enabled in hardhat.c
 
 TODO:
 
-- [ ] maybe a switch from vector mode to raster mode, for an individual tokenID
+- [x] maybe a switch from vector mode to raster mode, for an individual tokenID
 
-- [ ] daoRegistery map, settable by onlyOwner. imports and updates how many referrals have been accomplished.
+- [x] daoRegistery map, settable by onlyOwner. imports and updates how many referrals have been accomplished.
 
 - [ ] dutch auction contracts, and reserved whitelist at half of initial dutch auction price
 
@@ -22,4 +22,8 @@ TODO:
 
 - [ ] add events and check for existing ones in the imports
 
-- [ ] '"image": "', true ? super.tokenURI(tokenId) :  make toggle
+- [x] '"image": "', true ? super.tokenURI(tokenId) :  make toggle
+
+- [ ] due to space concerns, have to set uri in the constructor, setup IPFS in advance then
+
+- [ ] configure Candy struct related to auction and increased authorization

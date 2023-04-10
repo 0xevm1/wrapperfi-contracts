@@ -10,6 +10,39 @@
 
 ## Methods
 
+### allowlist
+
+```solidity
+function allowlist(address) external view returns (uint256)
+```
+
+end relational ownership for offchain switch *
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### allowlistMint
+
+```solidity
+function allowlistMint() external payable
+```
+
+
+
+
+
+
 ### approve
 
 ```solidity
@@ -49,6 +82,22 @@ function balanceOf(address owner) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
+### createCandyWrappers
+
+```solidity
+function createCandyWrappers(bytes attributes) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| attributes | bytes | undefined |
+
 ### getApproved
 
 ```solidity
@@ -74,7 +123,7 @@ function getApproved(uint256 tokenId) external view returns (address)
 ### getBackground
 
 ```solidity
-function getBackground(uint16 tokenId) external view returns (string[2] value)
+function getBackground(uint16 tokenId) external view returns (uint24[2] value)
 ```
 
 
@@ -91,12 +140,12 @@ function getBackground(uint16 tokenId) external view returns (string[2] value)
 
 | Name | Type | Description |
 |---|---|---|
-| value | string[2] | undefined |
+| value | uint24[2] | undefined |
 
-### getDescription
+### getCandyAttributes
 
 ```solidity
-function getDescription(uint16 tokenId) external view returns (string value)
+function getCandyAttributes(uint8 control, uint16 tokenId) external view returns (string value)
 ```
 
 
@@ -107,6 +156,7 @@ function getDescription(uint16 tokenId) external view returns (string value)
 
 | Name | Type | Description |
 |---|---|---|
+| control | uint8 | undefined |
 | tokenId | uint16 | undefined |
 
 #### Returns
@@ -136,116 +186,6 @@ function getOwnershipData(uint256 tokenId) external view returns (struct IERC721
 | Name | Type | Description |
 |---|---|---|
 | _0 | IERC721A.TokenOwnership | undefined |
-
-### getWrapperBody
-
-```solidity
-function getWrapperBody(uint16 tokenId) external view returns (string value)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| value | string | undefined |
-
-### getWrapperEnds
-
-```solidity
-function getWrapperEnds(uint16 tokenId) external view returns (string value)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| value | string | undefined |
-
-### getWrapperHighlights
-
-```solidity
-function getWrapperHighlights(uint16 tokenId) external view returns (string value)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| value | string | undefined |
-
-### getWrapperOuterBody
-
-```solidity
-function getWrapperOuterBody(uint16 tokenId) external view returns (string value)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| value | string | undefined |
-
-### getWrapperStripes
-
-```solidity
-function getWrapperStripes(uint16 tokenId) external view returns (string value)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| value | string | undefined |
 
 ### isApprovedForAll
 
@@ -318,28 +258,6 @@ function name() external view returns (string)
 | Name | Type | Description |
 |---|---|---|
 | _0 | string | undefined |
-
-### numberMinted
-
-```solidity
-function numberMinted(address owner) external view returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| owner | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 ### owner
 
@@ -584,10 +502,10 @@ function transferOwnership(address newOwner) external nonpayable
 |---|---|---|
 | newOwner | address | undefined |
 
-### withdrawERC20Token
+### withdrawMoney
 
 ```solidity
-function withdrawERC20Token(address tokenAddress) external nonpayable
+function withdrawMoney(address tokenAddress) external nonpayable
 ```
 
 
@@ -599,17 +517,6 @@ function withdrawERC20Token(address tokenAddress) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | tokenAddress | address | undefined |
-
-### withdrawMoney
-
-```solidity
-function withdrawMoney() external nonpayable
-```
-
-
-
-
-
 
 ### wrappedCandy
 

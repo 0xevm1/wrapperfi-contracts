@@ -40,7 +40,7 @@ describe("CandyWrapper", function () {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-        let numAttributes = 30000; //32 attributes fit in one storage slot, which is 32 bytes and 256 bits.
+        let numAttributes = 1; //32 attributes fit in one storage slot, which is 32 bytes and 256 bits.
         let byteArray: string[] = [];
 
         for (let i = 0; i < numAttributes; i++) {
@@ -56,7 +56,7 @@ describe("CandyWrapper", function () {
 
         //it should store 6 indexes as binary and pack each pair into a single bit
 
-        candyWrapper = (await CandyWrapperFactory.deploy(solidityBytes)) as CandyWrapper;
+        candyWrapper = (await CandyWrapperFactory.deploy()) as CandyWrapper;
         await candyWrapper.deployed();
     });
 

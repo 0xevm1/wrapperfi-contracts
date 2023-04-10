@@ -71,49 +71,43 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     //st4 is stripes
     //st5 is wrapper outer body
     struct Candy {
-        mapping(uint8 => string[2]) attributeBackground;
-        string[10] attributeWrapperEnds;
-        string[10] attributeWrapperHighlights;
-        string[10] attributeWrapperBody;
-        string[10] attributeWrapperStripes;
-        string[10] attributeWrapperOuterBody;
+        uint16 AUTHORIZATION;
+        bool reveal; //default false
+        mapping(uint8 => uint24[2]) attributeBackground;
+        uint24[10] attributeWrapperEnds;
+        uint24[10] attributeWrapperHighlights;
+        uint24[10] attributeWrapperBody;
+        uint24[10] attributeWrapperStripes;
+        uint24[10] attributeWrapperOuterBody;
         string[10] descriptorA;
         string[10] descriptorB;
         string[10] descriptorC;
-        uint16 AUTHORIZATION;
-        bool reveal; //default false
+
     }
 
     Candy private candyCollection;
 
     struct Vending {
+        uint8 maxPerAddressDuringMint;
         uint32 auctionSaleStartTime;
         uint32 publicSaleStartTime;
         uint64 mintlistPrice;
         uint64 publicPrice;
-        uint256 modePrice;
         uint32 publicSaleKey;
+        uint256 modePrice;
     }
 
     Vending private vendingMachine;
 
-    /** when owning an NFT, the owner can set it to be a raster image hosted offchain, resets for the next owner **/
-    // Store tokenId => owner relationship
-    //mapping(uint16 => address) public tokenIdToOwner;
-
-    // Store owner => tokenIds relationship
-
-    //mapping(address => uint16[]) public rasterMap;
-    //mapping(address => mapping(uint16 => uint256)) private ownerTokenIdToIndex;
 
     /** end relational ownership for offchain switch **/
 
-    //mapping(address => uint256) public allowlist;
+    mapping(address => uint256) public allowlist;
 
     //mapping(uint16 => uint16) public daoRegistryCount; //not initialized
 
     // // metadata URI
-    string private _baseTokenURI;
+    /*string private _baseTokenURI;
 
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
@@ -121,49 +115,50 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     function setBaseURI(string calldata baseURI) external onlyOwner {
         _baseTokenURI = baseURI;
-    }
+    }*/
 
 
-    constructor(bytes memory attributes) ERC721A("Candy", "CANDY"){
-        /*assembly {
-            let image := or(shl(16, shl(6, 1)), 0xC350)
-            mstore(0x40, image)
+    constructor() ERC721A("Candy", "CANDY"){
+        assembly {
+            let part1 := shl(16, 1) // Shift 1 by 16 bits to the left
+            let part2 := 0xC350
+            let image := or(part1, part2) // Combine the two 16-bit values
         }
-        uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;*/
+        uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
 
-        //set passed in attributes for the whole collection
-        candyBytes = attributes;
-
+        candyCollection.AUTHORIZATION = uint16(key & 0xffffffff); //AUTHORIZATION variable
+        candyCollection.reveal = false;
 
         //define attributes
-        candyCollection.attributeBackground[0] = ["#0b2d13", "#79c98c"]; //dark color, light color
-        candyCollection.attributeBackground[1] = ["#682850", "#FFCAEB"];
-        candyCollection.attributeBackground[2] = ["#303470", "#CCCFFF"];
-        candyCollection.attributeBackground[3] = ["#306a5f", "#CCFFF5"];
-        candyCollection.attributeBackground[4] = ["#2f692f", "#CCFFCC"];
-        candyCollection.attributeBackground[5] = ["#67692f", "#FDFFCF"];
-        candyCollection.attributeBackground[6] = ["#692f2f", "#FFCFCF"];
-        candyCollection.attributeBackground[7] = ["#2f6930", "#8AFF8D"];
-        candyCollection.attributeBackground[8] = ["#2f6169", "#8AEEFF"];
-        candyCollection.attributeBackground[9] = ["#5f2f69", "#EB8AFF"];
+        candyCollection.attributeBackground[0] = [0x0b2d13, 0x79c98c]; //dark color, light color
+        candyCollection.attributeBackground[1] = [0x682850, 0xFFCAEB];
+        candyCollection.attributeBackground[2] = [0x303470, 0xCCCFFF];
+        candyCollection.attributeBackground[3] = [0x306a5f, 0xCCFFF5];
+        candyCollection.attributeBackground[4] = [0x2f692f, 0xCCFFCC];
+        candyCollection.attributeBackground[5] = [0x67692f, 0xFDFFCF];
+        candyCollection.attributeBackground[6] = [0x692f2f, 0xFFCFCF];
+        candyCollection.attributeBackground[7] = [0x2f6930, 0x8AFF8D];
+        candyCollection.attributeBackground[8] = [0x2f6169, 0x8AEEFF];
+        candyCollection.attributeBackground[9] = [0x5f2f69, 0xEB8AFF];
 
         // bright contrasting colors
-        candyCollection.attributeWrapperEnds = ["#8086ff","#ff80e6","#80ffc8","#8cff80","#f5ff80",
-                                                "#f64444","#f444f6","#f6a044","#449cf6","#f644b1"];
+        candyCollection.attributeWrapperEnds = [0x8086ff,0xff80e6,0x80ffc8,0x8cff80,0xf5ff80,
+        0xf64444,0xf444f6,0xf6a044,0x449cf6,0xf644b1];
+
 
         // corresponds to background base color, a lighter version of it as if reflecting
-        candyCollection.attributeWrapperHighlights = ["#fcdef1", "#e6e8fe", "#ffffff", "#ffffff", "#ffffff",
-                                                      "#ffffff", "#c8ffc9", "#ffffff", "#f8d8ff", "#ffffff"];
+        candyCollection.attributeWrapperHighlights = [0xfcdef1, 0xe6e8fe, 0xffffff, 0xffffff, 0xffffff,
+        0xffffff, 0xc8ffc9, 0xffffff, 0xf8d8ff, 0xffffff];
 
-        candyCollection.attributeWrapperBody = ["#fe7c84", "#e77cfe", "#7c82fe", "#7cfeea", "#7cfe7c",
-                                                "#e7fe7c", "#fecc7c", "#d49b68", "#65d46d", "#ff00f6"];
+        candyCollection.attributeWrapperBody = [0xfe7c84, 0xe77cfe, 0x7c82fe, 0x7cfeea, 0x7cfe7c,
+        0xe7fe7c, 0xfecc7c, 0xd49b68, 0x65d46d, 0xff00f6];
         // vibrant colors
-        candyCollection.attributeWrapperStripes =  ["#e70095", "#007bff", "#d0001a", "#5ecf00", "#00e4b6",
-                                                    "#00cfff", "#ff00ff", "#fff759", "#00ffff", "#b567eb"];
+        candyCollection.attributeWrapperStripes =  [0xe70095, 0x007bff, 0xd0001a, 0x5ecf00, 0x00e4b6,
+        0x00cfff, 0xff00ff, 0xfff759, 0x00ffff, 0xb567eb];
 
         // compliments body color
-        candyCollection.attributeWrapperOuterBody = ["#9c8b8c", "#ac9090", "#8c8d9e", "#919f9d", "#9ca99c",
-                                                     "#aeb19e", "#a19e98", "#a9a39e", "#879388", "#a294a2"];
+        candyCollection.attributeWrapperOuterBody = [0x9c8b8c, 0xac9090, 0x8c8d9e, 0x919f9d, 0x9ca99c,
+        0xaeb19e, 0xa19e98, 0xa9a39e, 0x879388, 0xa294a2];
 
         //descriptors
         candyCollection.descriptorA = ["Sugary",
@@ -198,11 +193,8 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                                         "Gummies",
                                         "Chews",
                                         "Jellies"];
-
-        //candyCollection.AUTHORIZATION = uint16(key & 0xffffffff); //AUTHORIZATION variable
-        candyCollection.reveal = false;
-
     }
+
 
     /**
      * @dev Calculates the index for a new token ID based on the next available ID.
@@ -216,6 +208,11 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         return uint16(randomHash % 10);
     }
 
+    // this should accept a string of indices. each set of attributes takes 3 bytes each, and
+    function createCandyWrappers(bytes memory attributes) external onlyOwner {
+        candyBytes = abi.encodePacked(candyBytes, attributes);
+    }
+
     //unpack indices. three pairs of indices (6 indices) fit in 3 bytes
     function unpackAttributes(uint256 startIndex) internal view returns (bytes1[6] memory) {
         require(startIndex + 3 <= candyBytes.length, "Index out of bounds");
@@ -226,29 +223,29 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         }
 
         bytes1[6] memory candyFeatures;
-        candyFeatures[0] = binaryRightShift(attr[0], 4);
-        candyFeatures[1] = getLastN(attr[0], 4);
-        candyFeatures[2] = binaryRightShift(attr[1], 4);
-        candyFeatures[3] = getLastN(attr[1], 4);
-        candyFeatures[4] = binaryRightShift(attr[2], 4);
-        candyFeatures[5] = getLastN(attr[2], 4);
+        candyFeatures[0] = binaryRightShiftOrGetLastN(true, attr[0], 4);
+        candyFeatures[1] = binaryRightShiftOrGetLastN(false, attr[0], 4);
+        candyFeatures[2] = binaryRightShiftOrGetLastN(true, attr[1], 4);
+        candyFeatures[3] = binaryRightShiftOrGetLastN(false, attr[1], 4);
+        candyFeatures[4] = binaryRightShiftOrGetLastN(true, attr[2], 4);
+        candyFeatures[5] = binaryRightShiftOrGetLastN(false, attr[2], 4);
 
         return candyFeatures;
     }
-    /*** bit shifting methods ***/
 
-    function binaryRightShift(bytes1 a, uint8 n) internal pure returns (bytes1){
-        return a >> n;
-    }
+    /*** bit shifting master method ***/
+    function binaryRightShiftOrGetLastN(bool rightTrueLastNFalse, bytes1 a, uint8 n) internal pure returns (bytes1){
+        if(rightTrueLastNFalse)
+            return a >> n;
+        else {
+            uint8 y = uint8(a);
 
-    function getLastN(bytes1 x, uint8 n) internal pure returns (bytes1) {
-        uint8 y = uint8(x);
+            uint256 mask = (1 << n) - 1;
 
-        uint256 mask = (1 << n) - 1;
+            uint8 z = y & uint8(mask);
 
-        uint8 z = y & uint8(mask);
-
-        return bytes1(z);
+            return bytes1(z);
+        }
     }
 
     function bytesToBinaryString(bytes1 b) internal pure returns (string memory) {
@@ -261,9 +258,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     /*** end bit shifting methods ***/
 
-    /*function seedAllowlist(address[] memory addresses, uint256[] memory numSlots)
-    external
-    onlyOwner
+    /*function seedAllowlist(address[] memory addresses, uint256[] memory numSlots) external onlyOwner
     {
         require(
             addresses.length == numSlots.length,
@@ -272,17 +267,17 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < addresses.length; i++) {
             allowlist[addresses[i]] = numSlots[i];
         }
-    }
+    }*/
 
     function allowlistMint() external payable callerIsUser {
-        uint256 price = uint256(saleConfig.mintlistPrice);
+        uint256 price = uint256(vendingMachine.mintlistPrice);
         require(price != 0, "allowlist sale has not begun yet");
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint");
-        require(totalSupply() + 1 <= collectionSize, "reached max supply");
+        require(totalSupply() + 1 <= candyCollection.AUTHORIZATION, "Too much candy.");
         allowlist[msg.sender]--;
         _safeMint(msg.sender, 1);
         refundIfOver(price);
-    }*/
+    }
 
 
     function mint(uint256 quantity) external payable callerIsUser {
@@ -307,10 +302,10 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
             "Too much Candy."
         );
 
-        /*require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
+        require(
+            numberMinted(msg.sender) + quantity <= vendingMachine.maxPerAddressDuringMint,
             "Can not mint this many"
-        );*/
+        );
 
         _mint(msg.sender, quantity);
         refundIfOver(publicPrice * quantity);
@@ -323,7 +318,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         }
     }
 
-    function numberMinted(address owner) public view returns (uint256) {
+    function numberMinted(address owner) internal view returns (uint256) {
         return _numberMinted(owner);
     }
 
@@ -339,23 +334,23 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     /*** rescue functions ***/
 
-    function withdrawMoney() external onlyOwner nonReentrant {
-        (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "Transfer failed.");
-    }
+    function withdrawMoney(address tokenAddress) external onlyOwner nonReentrant {
+        if(tokenAddress.code.length > 0){
+            // Create an instance of the ERC20 token using the provided token address
+                IERC20 token = IERC20(tokenAddress);
 
-    function withdrawERC20Token(address tokenAddress) external onlyOwner nonReentrant {
-        // Create an instance of the ERC20 token using the provided token address
-        IERC20 token = IERC20(tokenAddress);
+            // Check the contract's balance of the specified token
+            uint256 contractTokenBalance = token.balanceOf(address(this));
 
-        // Check the contract's balance of the specified token
-        uint256 contractTokenBalance = token.balanceOf(address(this));
+            // Ensure the contract has enough balance to fulfill the withdrawal request
+            require(contractTokenBalance >= 0, "Not enough tokens in the contract");
 
-        // Ensure the contract has enough balance to fulfill the withdrawal request
-        require(contractTokenBalance >= 0, "Not enough tokens in the contract");
-
-        // Transfer the specified amount of tokens to the caller (msg.sender)
-        token.transfer(msg.sender, contractTokenBalance);
+            // Transfer the specified amount of tokens to the caller (msg.sender)
+            token.transfer(msg.sender, contractTokenBalance);
+        } else {
+            (bool success, ) = msg.sender.call{value: address(this).balance}("");
+            require(success, "Transfer failed.");
+        }
     }
 
     /*function updateAuthorization(uint16 session) external onlyOwner nonReentrant {
@@ -376,54 +371,45 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     * easier to acquire and find than a random index. they can simulate random indexes by sending in different tokenIds
     ***/
 
-    function getBackground(uint16 tokenId) public view returns(string[2] memory value){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+    function getBackground(uint16 tokenId) public view returns(uint24[2] memory value){
+        require(_exists(tokenId), "This piece of candy does not exist.");
         bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
         return candyCollection.attributeBackground[uint8(candyFeatures[0])];
     }
 
-    function getWrapperEnds(uint16 tokenId) public view returns(string memory value){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+    function getCandyAttributes(uint8 control, uint16 tokenId) public view returns(string memory value){
+        require(_exists(tokenId), "This piece of candy does not exist.");
         bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
-        return candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])];
-    }
 
-    function getWrapperHighlights(uint16 tokenId) public view returns(string memory value){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
-        return candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])];
-    }
+        /*bytes memory buffer = new bytes(7);
+        for (uint i = 0; i < 7; i++) {
+            buffer[i] = data[i];
+        }
+        return string(buffer);*/
 
-    function getWrapperBody(uint16 tokenId) public view returns(string memory value){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
-        return candyCollection.attributeWrapperBody[uint8(candyFeatures[3])];
-    }
+        if(control == 1){ // wrapper ends
+            candyCollection.reveal ? Strings.toString(candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])]) : "#000000";
+        } else if(control == 2){ //wrapper highlights
+            candyCollection.reveal ? Strings.toString(candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])]) :'#FFFFFF';
+        } else if(control == 3){ //wrapper body
+            return candyCollection.reveal ? Strings.toString(candyCollection.attributeWrapperBody[uint8(candyFeatures[3])]) : "#000000";
+        } else if(control == 4){ //wrapper stripes
+            return candyCollection.reveal ? Strings.toString(candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])]) : "#000000";
+        } else if(control == 5){ //wrapper outer body
+            return candyCollection.reveal ? Strings.toString(candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])]) : "#000000";
+        } else if(control == 6){ //get concatenated description
+            uint16 index = indexFromTokenID(tokenId);
 
-    function getWrapperStripes(uint16 tokenId) public view returns(string memory value){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
-        return candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])];
-    }
+            //can do even and odd variations here to add variation
+            string memory description = string.concat(candyCollection.descriptorA[index], " ");
+            description = string.concat(description, candyCollection.descriptorB[tokenId % 2 == 0 ? index : indexFromTokenID(index)]); //else condition is a derivative, for entropy
+            description = string.concat(description, " ");
+            description = string.concat(description, candyCollection.descriptorC[index]);
 
-    function getWrapperOuterBody(uint16 tokenId) public view returns(string memory value){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
-        return candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])];
-    }
-
-    function getDescription(uint16 tokenId) public view returns(string memory value) {
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-
-        uint16 index = indexFromTokenID(tokenId);
-
-        //can do even and odd variations here to add variation
-        string memory description = string.concat(candyCollection.descriptorA[index], " ");
-        description = string.concat(description, candyCollection.descriptorB[tokenId % 2 == 0 ? index : indexFromTokenID(index)]); //else condition is a derivative, for entropy
-        description = string.concat(description, " ");
-        description = string.concat(description, candyCollection.descriptorC[index]);
-
-        return description;
+            return description;
+        } else {
+            return '#000000';
+        }
     }
 
     /*** end attribute functions ***/
@@ -468,7 +454,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
      * @return A string containing the SVG data for the candy associated with the tokenId, in base64 format
      */
     function wrappedCandy(uint16 tokenId) public view returns(string memory){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        require(_exists(tokenId), "This piece of candy does not exist.");
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -480,10 +466,9 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
 
         bytes memory svg = abi.encodePacked(
-            '<?xml version="1.0" encoding="utf-8"?>',
             '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"',
             'viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">',
-                wrappedCandyGenerateStyleBlock(candyFeatures),
+                wrappedCandyGenerateStyleBlock(tokenId),
                 wrappedCandyGenerateCandyBlock(candyFeatures, tokenId),
                 wrappedCandyGenerateGradientBlock(tokenId),
             '</svg>'
@@ -497,19 +482,18 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         );
     }
 
-    function wrappedCandyGenerateStyleBlock(bytes1[6] memory candyFeatures) internal view returns (string memory){
-        return string(abi.encodePacked(
+    function wrappedCandyGenerateStyleBlock(uint16 tokenId) internal view returns (bytes memory){
+        return abi.encodePacked(
                         '<style type="text/css">',
-                        '/*.st0 is background, which is a gradient*/',
-                        '.st1{fill:', candyCollection.reveal ? candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])]:'#000000',';} /*wrapper ends*/',
-                        '.st2{fill:', candyCollection.reveal ? candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])]:'#FFFFFF',';} /*highlights*/',
-                        '.st3{fill:', candyCollection.reveal ? candyCollection.attributeWrapperBody[uint8(candyFeatures[3])]:'#000000',';} /*wrapper body*/',
-                        '.st4{fill:', candyCollection.reveal ? candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])]:'#000000',';} /* stripes */',
-                        '.st5{opacity:0.5;fill:', candyCollection.reveal ? candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])]:'#000000',';enable-background:new    ;}',
+                        '.st1{fill:', getCandyAttributes(1, tokenId),';}',
+                        '.st2{fill:', getCandyAttributes(2, tokenId),';}',
+                        '.st3{fill:', getCandyAttributes(3, tokenId),';}',
+                        '.st4{fill:', getCandyAttributes(4, tokenId),';}',
+                        '.st5{opacity:0.5;fill:', getCandyAttributes(5, tokenId),';enable-background:new;}',
                         '.st6{fill:none;}',
-                        '.st7{font-family:\'Impact\'; opacity: 1; -webkit-text-stroke: 2px white; fill:',candyCollection.attributeWrapperBody[uint8(candyFeatures[3])],'; stroke: ',candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])],';} /*make fill = wrapper body, stroke = stripes*/',
+                        '.st7{font-family:\'Impact\'; opacity: 1; -webkit-text-stroke: 2px white; fill:', getCandyAttributes(3, tokenId),'; stroke: ',getCandyAttributes(4, tokenId),';}',
                         '.st8{font-size:30px;}',
-                        '.st3bg{fill:', candyCollection.reveal ? candyCollection.attributeWrapperBody[uint8(candyFeatures[3])]:'#000000',';} /*wrapper body*/',
+                        '.st3bg{fill:', getCandyAttributes(3, tokenId),';}',
                         '',
                         '.fade-in-path {',
                         'opacity: 100%;',
@@ -561,16 +545,15 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                         '100%   { transform: translate(0, -0px); }',
                         '}',
                         '</style>'
-                )
         );
     }
 
-    function wrappedCandyGenerateCandyBlock(bytes1[6] memory candyFeatures, uint16 tokenId) internal view returns (string memory){
+    function wrappedCandyGenerateCandyBlock(bytes1[6] memory candyFeatures, uint16 tokenId) internal view returns (bytes memory){
 
         //used exclusively for descriptors
         uint16 index = indexFromTokenID(tokenId);
 
-        return string(abi.encodePacked(
+        return abi.encodePacked(
                         '<rect class="st0" fill="url(#darkGradient)" stroke="url(#largeGradient)" rx="15" width="800" height="800"/>',
                         '<rect x="340.6" y="351" class="st6" width="211" height="147"/>',
                         '<g class="floating">',
@@ -631,28 +614,28 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                         '<tspan x="20" y="150" class="st7" style="font-size: 250px;">?</tspan>',
                         '</text>',
                         '</g>'
-                    )
+
         );
     }
 
-    function wrappedCandyGenerateGradientBlock(uint16 tokenId) internal view returns (string memory){
-        return string(abi.encodePacked(
+    function wrappedCandyGenerateGradientBlock(uint16 tokenId) internal view returns (bytes memory){
+        return abi.encodePacked(
                 '<defs>',
                 '<linearGradient id="darkGradient" x1="30%" y1="70%">',
-                '<stop offset="0%" stop-color="', candyCollection.reveal ? getBackground(tokenId)[0]:'#000000','">',
-                '  <animate attributeName="stop-color" values="', candyCollection.reveal ? getBackground(tokenId)[0]:'#000000','; #', candyCollection.reveal ? getBackground(tokenId)[1]:'#ffffff',';" dur="1.5s" repeatCount="1" fill="freeze"/>',
+                '<stop offset="0%" stop-color="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','">',
+                '  <animate attributeName="stop-color" values="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','; #', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff',';" dur="1.5s" repeatCount="1" fill="freeze"/>',
                 '</stop>',
-                '<stop offset="100%" stop-color="', candyCollection.reveal ? getBackground(tokenId)[1]:'#ffffff','">',
-                '  <animate attributeName="stop-color" values="', candyCollection.reveal ? getBackground(tokenId)[1]:'#ffffff','; ', candyCollection.reveal ? getBackground(tokenId)[0]:'#000000','" dur="3s" fill="freeze" />',
+                '<stop offset="100%" stop-color="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff','">',
+                '  <animate attributeName="stop-color" values="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff','; ', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','" dur="3s" fill="freeze" />',
                 '</stop>',
                 '</linearGradient>',
                 '</defs>'
-            ));
+            );
     }
 
     //on PFPMode, use super
     function tokenURI(uint256 tokenId) override public view returns (string memory){
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+        require(_exists(tokenId), "This piece of candy does not exist.");
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -660,22 +643,18 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         //st4 is stripes
         //st5 is wrapper outer body
 
-        //unpack indices. three pairs of indices (6 indices) fit in 3 bytes
-        //6 bytes of attribute indices
-        bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
-
-        string memory background = string.concat(getBackground(uint16(tokenId))[0], " ");
-        background = string.concat(background, getBackground(uint16(tokenId))[1]);
+        string memory background = string.concat(Strings.toString(getBackground(uint16(tokenId))[0]), " ");
+        background = string.concat(background, Strings.toString(getBackground(uint16(tokenId))[1]));
 
         bytes memory dataURI = abi.encodePacked(
             '{',
-                '"name": "#', Strings.toString(tokenId), ': ', getDescription(uint16(tokenId)), '",',
+                '"name": "#', Strings.toString(tokenId), ': ', getCandyAttributes(6, uint16(tokenId)), '",',
                 '"description": "Candy",',
                 '"image": "', wrappedCandy(uint16(tokenId)), '"', //do conditional baseUri here ownerTokenIdToIndex[msg.sender][tokenId]
                 '"attributes": [',
                     '{',
                         '"trait_type": "Name",',
-                        '"value": "', getDescription(uint16(tokenId)), '"',
+                        '"value": "', getCandyAttributes(6, uint16(tokenId)), '"',
                     '},',
                     '{',
                         '"trait_type": "Background",',
@@ -683,23 +662,23 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                     '},',
                     '{',
                         '"trait_type": "Twist Ties",',
-                        '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperEnds[uint8(candyFeatures[1])] : "#000000", '"',
+                        '"value": "', getCandyAttributes(1, uint16(tokenId)) , '"',
                     '},'
                     '{',
                         '"trait_type": "Accent",',
-                        '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperHighlights[uint8(candyFeatures[2])] : "#000000", '"',
+                        '"value": "', getCandyAttributes(2, uint16(tokenId)) , '"',
                     '},'
                     '{',
                         '"trait_type": "Body",',
-                        '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperBody[uint8(candyFeatures[3])] : "#000000", '"',
+                        '"value": "', getCandyAttributes(3, uint16(tokenId)) , '"',
                     '},'
                     '{',
                         '"trait_type": "Stripes",',
-                        '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperStripes[uint8(candyFeatures[4])] : "#000000", '"',
+                        '"value": "', getCandyAttributes(4, uint16(tokenId)) , '"',
                     '},'
                     '{',
                         '"trait_type": "Outline",',
-                        '"value": "', candyCollection.reveal ? candyCollection.attributeWrapperOuterBody[uint8(candyFeatures[5])] : "#000000", '"',
+                        '"value": "', getCandyAttributes(5, uint16(tokenId)) , '"',
                     '},',
                     '{',
                         '"display_type": "number",',

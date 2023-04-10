@@ -10,28 +10,6 @@
 
 ## Methods
 
-### allowlist
-
-```solidity
-function allowlist(address) external view returns (uint256)
-```
-
-end relational ownership for offchain switch *
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | address | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### allowlistMint
 
 ```solidity
@@ -81,22 +59,6 @@ function balanceOf(address owner) external view returns (uint256)
 | Name | Type | Description |
 |---|---|---|
 | _0 | uint256 | undefined |
-
-### createCandyWrappers
-
-```solidity
-function createCandyWrappers(bytes attributes) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| attributes | bytes | undefined |
 
 ### getApproved
 
@@ -390,6 +352,22 @@ function setApprovalForAll(address operator, bool approved) external nonpayable
 |---|---|---|
 | operator | address | undefined |
 | approved | bool | undefined |
+
+### setBaseURI
+
+```solidity
+function setBaseURI(string baseURI) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| baseURI | string | undefined |
 
 ### supportsInterface
 

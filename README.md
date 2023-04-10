@@ -19,3 +19,7 @@ TODO:
 - [ ] dutch auction contracts, and reserved whitelist at half of initial dutch auction price
 
 - [ ] do deployment scripts
+
+- [ ] add events and check for existing ones in the imports
+
+- [ ] '"image": "', true ? super.tokenURI(tokenId) :  make toggle

@@ -99,30 +99,24 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     Vending private vendingMachine;
 
-
     /** end relational ownership for offchain switch **/
 
-    mapping(address => uint256) public allowlist;
+    mapping(address => uint256) private allowlist;
 
     //mapping(uint16 => uint16) public daoRegistryCount; //not initialized
 
     // // metadata URI
-    /*string private _baseTokenURI;
+    string private _baseTokenURI;
 
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
-    }
-
-    function setBaseURI(string calldata baseURI) external onlyOwner {
+    function setBaseURI(string memory baseURI) external onlyOwner {
         _baseTokenURI = baseURI;
-    }*/
-
+    }
 
     constructor() ERC721A("Candy", "CANDY"){
         assembly {
-            let part1 := shl(16, 1) // Shift 1 by 16 bits to the left
+            let part1 := shl(16, 1)
             let part2 := 0xC350
-            let image := or(part1, part2) // Combine the two 16-bit values
+            let image := or(part1, part2)
         }
         uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
 
@@ -208,10 +202,10 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         return uint16(randomHash % 10);
     }
 
-    // this should accept a string of indices. each set of attributes takes 3 bytes each, and
-    function createCandyWrappers(bytes memory attributes) external onlyOwner {
+    // this should accept a string of indices. each set of attributes takes 3 bytes each, not necessary if it can be done in constructor
+    /*function createCandyWrappers(bytes memory attributes) external onlyOwner {
         candyBytes = abi.encodePacked(candyBytes, attributes);
-    }
+    }*/
 
     //unpack indices. three pairs of indices (6 indices) fit in 3 bytes
     function unpackAttributes(uint256 startIndex) internal view returns (bytes1[6] memory) {
@@ -231,6 +225,9 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         candyFeatures[5] = binaryRightShiftOrGetLastN(false, attr[2], 4);
 
         return candyFeatures;
+
+        /** could use candyFeatures[0] as the index as is, indexFromTokenId, indexFromTokenId[index] derivative, indexFromTokenId[MAX_UINT % candyFeatures[0]], MAX_UINT % candyFeatures[0], index again
+            and startIndex even or odd could dictate which half of the byte to use
     }
 
     /*** bit shifting master method ***/
@@ -319,10 +316,9 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     }
 
     function reveal() external onlyOwner {
-        require(candyCollection.reveal == false, "Reveal event already occurred");
+        require(candyCollection.reveal == false, "Revealed.");
         candyCollection.reveal = true;
     }
-
 
     function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
     {
@@ -336,7 +332,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     /*** rescue functions ***/
 
     function withdrawMoney(address tokenAddress) external onlyOwner nonReentrant {
-        if(tokenAddress.code.length > 0){
+        if(tokenAddress.code.length > 0){ //is an already deployed smart contract
             // Create an instance of the ERC20 token using the provided token address
             IERC20 token = IERC20(tokenAddress);
 
@@ -460,7 +456,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                         '.st2{fill:', getCandyAttributes(2, tokenId),';}',
                         '.st3{fill:', getCandyAttributes(3, tokenId),';}',
                         '.st4{fill:', getCandyAttributes(4, tokenId),';}',
-                        '.st5{opacity:0.5;fill:', getCandyAttributes(5, tokenId),';enable-background:new;}',
+                        '.st5{opacity:0.5;fill:', getCandyAttributes(5, tokenId),';}',
                         '.st6{fill:none;}',
                         '.st7{font-family:\'Impact\'; opacity: 1; -webkit-text-stroke: 2px white; fill:', getCandyAttributes(3, tokenId),'; stroke: ',getCandyAttributes(4, tokenId),';}',
                         '.st8{font-size:30px;}',
@@ -621,7 +617,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
             '{',
                 '"name": "#', Strings.toString(tokenId), ': ', getCandyAttributes(6, uint16(tokenId)), '",',
                 '"description": "Candy",',
-                '"image": "', wrappedCandy(uint16(tokenId)), '"', //do conditional baseUri here ownerTokenIdToIndex[msg.sender][tokenId]
+                '"image": "', true ? super.tokenURI(tokenId) : wrappedCandy(uint16(tokenId)), '"', //do conditional baseUri here ownerTokenIdToIndex[msg.sender][tokenId]
                 '"attributes": [',
                     '{',
                         '"trait_type": "Name",',
@@ -650,7 +646,12 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                     '{',
                         '"trait_type": "Outline",',
                         '"value": "', getCandyAttributes(5, uint16(tokenId)) , '"',
-                    '}'
+                    '},',
+                    '{',
+                        '"display_type": "number",',
+                        '"trait_type": "DAOs Registered",',
+                        '"value": 0',//candyCollection.daoRegistryCount[tokenId], '"'
+                    '}',
                 ']',
             '}'
         );

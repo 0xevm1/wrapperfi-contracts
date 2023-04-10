@@ -6,7 +6,7 @@
 		.st2{fill:#FFFFFF;} /*highlights*/
 		.st3{fill:#FE7C84;} /*wrapper body*/
 		.st4{fill:#C3C3C3;} /* stripes */
-		.st5{opacity:0.5;fill:#B2B2B2;enable-background:new    ;}
+		.st5{opacity:0.5;fill:#B2B2B2;}
 		.st6{fill:none;}
 		.st7{font-family:'Impact'; opacity: 1; -webkit-text-stroke: 2px white; fill: #FE7C84; stroke: #343434;} /*make fill = wrapper body, stroke = stripes*/
 		.st8{font-size:30px;}

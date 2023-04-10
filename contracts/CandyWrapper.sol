@@ -53,12 +53,12 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     /** only used to limit the minting function **/
     modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is another contract");
+        require(tx.origin == msg.sender, "Candy is for people.");
         _;
     }
 
     modifier callerHasTokenID(uint16 tokenId) {
-        require(msg.sender == ownerOf(tokenId), "Not the owner");
+        require(msg.sender == ownerOf(tokenId), "Not your candy.");
         _;
     }
 
@@ -258,21 +258,21 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     /*** end bit shifting methods ***/
 
-    /*function seedAllowlist(address[] memory addresses, uint256[] memory numSlots) external onlyOwner
+    function seedAllowlist(address[] memory addresses, uint256[] memory numSlots) external onlyOwner
     {
         require(
             addresses.length == numSlots.length,
-            "addresses does not match numSlots length"
+            "Mismatch"
         );
         for (uint256 i = 0; i < addresses.length; i++) {
             allowlist[addresses[i]] = numSlots[i];
         }
-    }*/
+    }
 
     function allowlistMint() external payable callerIsUser {
         uint256 price = uint256(vendingMachine.mintlistPrice);
-        require(price != 0, "allowlist sale has not begun yet");
-        require(allowlist[msg.sender] > 0, "not eligible for allowlist mint");
+        require(price != 0, "Wait");
+        require(allowlist[msg.sender] > 0, "Not Eligible");
         require(totalSupply() + 1 <= candyCollection.AUTHORIZATION, "Too much candy.");
         allowlist[msg.sender]--;
         _safeMint(msg.sender, 1);
@@ -303,7 +303,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         );
 
         require(
-            numberMinted(msg.sender) + quantity <= vendingMachine.maxPerAddressDuringMint,
+            _numberMinted(msg.sender) + quantity <= vendingMachine.maxPerAddressDuringMint,
             "Can not mint this many"
         );
 
@@ -318,26 +318,17 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         }
     }
 
-    function numberMinted(address owner) internal view returns (uint256) {
-        return _numberMinted(owner);
-    }
-
-    function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
+    /*function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
     {
         return _ownershipOf(tokenId);
-    }
-
-    function reveal() external onlyOwner {
-        require(candyCollection.reveal == false, "Reveal event already occurred");
-        candyCollection.reveal = true;
-    }
+    }*/
 
     /*** rescue functions ***/
 
     function withdrawMoney(address tokenAddress) external onlyOwner nonReentrant {
         if(tokenAddress.code.length > 0){
             // Create an instance of the ERC20 token using the provided token address
-                IERC20 token = IERC20(tokenAddress);
+            IERC20 token = IERC20(tokenAddress);
 
             // Check the contract's balance of the specified token
             uint256 contractTokenBalance = token.balanceOf(address(this));
@@ -350,6 +341,9 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         } else {
             (bool success, ) = msg.sender.call{value: address(this).balance}("");
             require(success, "Transfer failed.");
+            //reveal logic is here
+            //require(candyCollection.reveal == false, "Reveal event already occurred");
+            candyCollection.reveal = true;
         }
     }
 
@@ -372,13 +366,13 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     ***/
 
     function getBackground(uint16 tokenId) public view returns(uint24[2] memory value){
-        require(_exists(tokenId), "This piece of candy does not exist.");
+        require(_exists(tokenId), "No Candy.");
         bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
         return candyCollection.attributeBackground[uint8(candyFeatures[0])];
     }
 
     function getCandyAttributes(uint8 control, uint16 tokenId) public view returns(string memory value){
-        require(_exists(tokenId), "This piece of candy does not exist.");
+        require(_exists(tokenId), "No Candy.");
         bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
 
         /*bytes memory buffer = new bytes(7);
@@ -418,43 +412,15 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         Some platforms do not support SVG, this method allows switching to a raster image
 
     */
-    function modePrice(uint256 price) external onlyOwner {
-        vendingMachine.modePrice = price;
-    }
-
-    /*
-        offchain mode, usable for displaying on other PFP platforms that don't support SVGs
-    */
-    /*function rasterMode(uint16 tokenId) external payable callerIsUser callerHasTokenID(tokenId) nonReentrant {
-        //add to rasterMap
-        rasterMap[msg.sender].push(tokenId);
-        ownerTokenIdToIndex[msg.sender][tokenId] = rasterMap[msg.sender].length - 1;
-        refundIfOver(vendingMachine.modePrice);
-    }
-
-    function vectorMode(uint16 tokenId) external payable callerIsUser callerHasTokenID(tokenId) nonReentrant {
-        //remove from rasterMap
-
-        uint256 indexToRemove = ownerTokenIdToIndex[msg.sender][tokenId];
-        uint16 lastTokenId = rasterMap[msg.sender][rasterMap[msg.sender].length - 1];
-
-        rasterMap[msg.sender][indexToRemove] = lastTokenId;
-        ownerTokenIdToIndex[msg.sender][lastTokenId] = indexToRemove;
-        rasterMap[msg.sender].pop();
-
-        delete ownerTokenIdToIndex[msg.sender][tokenId];
-
-        refundIfOver(vendingMachine.modePrice);
-    }*/
 
     /**
      * @dev Returns an SVG string representation of the candy associated with the given tokenId.
      * The SVG string can be used by browsers and other clients to quickly render the candy's image.
      * @param tokenId The uint16 tokenId representing the specific candy.
-     * @return A string containing the SVG data for the candy associated with the tokenId, in base64 format
+     * @return A bytes containing the SVG data for the candy associated with the tokenId, in base64 format
      */
-    function wrappedCandy(uint16 tokenId) public view returns(string memory){
-        require(_exists(tokenId), "This piece of candy does not exist.");
+    function wrappedCandy(uint16 tokenId) public view returns(bytes memory){
+        require(_exists(tokenId), "No Candy.");
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -474,12 +440,11 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
             '</svg>'
         );
 
-        return string(
-            abi.encodePacked(
+        return abi.encodePacked(
                 "data:image/svg+xml;base64,",
                 Base64.encode(svg)
-            )
-        );
+               );
+
     }
 
     function wrappedCandyGenerateStyleBlock(uint16 tokenId) internal view returns (bytes memory){
@@ -516,8 +481,8 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                         '  85% {opacity: 0}',
                         '}',
                         '',
-                        '.floating {',
-                        'animation-name: floating;',
+                        '.f {',
+                        'animation-name: f;',
                         'animation-duration: 3s;',
                         'animation-iteration-count: infinite;',
                         'animation-timing-function: ease-in-out;',
@@ -525,21 +490,21 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                         'margin-top: 5px;',
                         '}',
                         '',
-                        '@keyframes floating {',
+                        '@keyframes f {',
                         '0% { transform: translate(0,  0px); }',
                         '50%  { transform: translate(0, 15px); }',
                         '100%   { transform: translate(0, -0px); }',
                         '}',
                         '',
-                        '.floatingdelay {',
-                        'animation-name: floatingdelay;',
+                        '.fd {',
+                        'animation-name: fd;',
                         'animation-delay: 0.5s;',
                         'animation-duration: 3s;',
                         'animation-iteration-count: infinite;',
                         'animation-timing-function: ease-in-out;',
                         '}',
                         '',
-                        '@keyframes floatingdelay {',
+                        '@keyframes fd {',
                         '0% { transform: translate(0, 0px);}',
                         '50%  { transform: translate(0, 30px); }',
                         '100%   { transform: translate(0, -0px); }',
@@ -554,13 +519,13 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         uint16 index = indexFromTokenID(tokenId);
 
         return abi.encodePacked(
-                        '<rect class="st0" fill="url(#darkGradient)" stroke="url(#largeGradient)" rx="15" width="800" height="800"/>',
+                        '<rect class="st0" fill="url(#d)" rx="15" width="800" height="800"/>',
                         '<rect x="340.6" y="351" class="st6" width="211" height="147"/>',
-                        '<g class="floating">',
+                        '<g class="f">',
                         '<path id="st3bg" class="st3bg" d="M276.6,556.6c42,40.4,84.9,53.9,143.6,49.4c75.4-5.9,171-88.2,168.8-187.3',
                         'c-1.8-80-41.9-125.6-71.1-146.3c-26.9-19.1-68.6-45.6-132-38.9c-76.1,8-167.2,87.2-167.8,182.8C217.6,492.7,244.4,525.5,276.6,556.6',
                         'z"/>',
-                        '<g class="floatingdelay" style="opacity: ',candyCollection.reveal ?'1':'0',';">',
+                        '<g class="fd" style="opacity: ',candyCollection.reveal ?'1':'0',';">',
                         '<text transform="matrix(1 0 0 1 340.6391 363.6001)">',
                         '<tspan x="0" y="-20.2" class="st7 st8">',candyCollection.descriptorA[index],'</tspan>',
                         '<tspan x="0" y="20" class="st7 st8">',candyCollection.descriptorB[tokenId % 2 == 0 ? index : indexFromTokenID(index)],'</tspan>',
@@ -609,8 +574,8 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                         'L386,233.4z M502.4,293c25.3,18,60,57.4,61.5,126.6c1.9,85.8-80.8,156.9-146.1,162.1c-50.8,4-87.9-7.7-124.2-42.7',
                         'c-27.9-26.9-51.1-55.3-50.6-121.4c0.5-82.7,79.4-151.3,145.2-158.2C443.1,253.6,479.1,276.5,502.4,293L502.4,293z"/>',
                         '</g>',
-                        '<g class="floatingdelay" style="opacity: ',candyCollection.reveal ?'0':'1',';">',
-                        '<text class="floatingdelay" transform="matrix(1 0 0 1 340.6391 363.6001)">',
+                        '<g class="fd" style="opacity: ',candyCollection.reveal ?'0':'1',';">',
+                        '<text class="fd" transform="matrix(1 0 0 1 340.6391 363.6001)">',
                         '<tspan x="20" y="150" class="st7" style="font-size: 250px;">?</tspan>',
                         '</text>',
                         '</g>'
@@ -621,12 +586,12 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
     function wrappedCandyGenerateGradientBlock(uint16 tokenId) internal view returns (bytes memory){
         return abi.encodePacked(
                 '<defs>',
-                '<linearGradient id="darkGradient" x1="30%" y1="70%">',
-                '<stop offset="0%" stop-color="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','">',
-                '  <animate attributeName="stop-color" values="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','; #', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff',';" dur="1.5s" repeatCount="1" fill="freeze"/>',
+                '<linearGradient id="d" x1="30%" y1="70%">',
+                '<stop offset="0%" s="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','">',
+                '  <animate attributeName="s values="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','; #', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff',';" dur="1.5s" repeatCount="1" fill="freeze"/>',
                 '</stop>',
-                '<stop offset="100%" stop-color="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff','">',
-                '  <animate attributeName="stop-color" values="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff','; ', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','" dur="3s" fill="freeze" />',
+                '<stop offset="100%" s="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff','">',
+                '  <animate attributeName="s" values="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff','; ', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'#000000','" dur="3s" fill="freeze" />',
                 '</stop>',
                 '</linearGradient>',
                 '</defs>'
@@ -635,7 +600,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
 
     //on PFPMode, use super
     function tokenURI(uint256 tokenId) override public view returns (string memory){
-        require(_exists(tokenId), "This piece of candy does not exist.");
+        require(_exists(tokenId), "No Candy.");
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -679,20 +644,15 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                     '{',
                         '"trait_type": "Outline",',
                         '"value": "', getCandyAttributes(5, uint16(tokenId)) , '"',
-                    '},',
-                    '{',
-                        '"display_type": "number",',
-                        '"trait_type": "DAOs Registered",',
-                        '"value": 0',//candyCollection.daoRegistryCount[tokenId], '"'
-                    '}',
+                    '}'
                 ']',
             '}'
         );
-        return string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(dataURI)
-            )
+
+        return string(abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(dataURI)
+                )
         );
     }
 }

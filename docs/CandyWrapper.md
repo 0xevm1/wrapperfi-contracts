@@ -165,28 +165,6 @@ function getCandyAttributes(uint8 control, uint16 tokenId) external view returns
 |---|---|---|
 | value | string | undefined |
 
-### getOwnershipData
-
-```solidity
-function getOwnershipData(uint256 tokenId) external view returns (struct IERC721A.TokenOwnership)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | IERC721A.TokenOwnership | undefined |
-
 ### isApprovedForAll
 
 ```solidity
@@ -225,22 +203,6 @@ function mint(uint256 quantity) external payable
 | Name | Type | Description |
 |---|---|---|
 | quantity | uint256 | undefined |
-
-### modePrice
-
-```solidity
-function modePrice(uint256 price) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| price | uint256 | undefined |
 
 ### name
 
@@ -309,17 +271,6 @@ function renounceOwnership() external nonpayable
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
 
 
-### reveal
-
-```solidity
-function reveal() external nonpayable
-```
-
-
-
-
-
-
 ### safeTransferFrom
 
 ```solidity
@@ -357,6 +308,23 @@ function safeTransferFrom(address from, address to, uint256 tokenId, bytes _data
 | tokenId | uint256 | undefined |
 | _data | bytes | undefined |
 
+### seedAllowlist
+
+```solidity
+function seedAllowlist(address[] addresses, uint256[] numSlots) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| addresses | address[] | undefined |
+| numSlots | uint256[] | undefined |
+
 ### setApprovalForAll
 
 ```solidity
@@ -373,22 +341,6 @@ function setApprovalForAll(address operator, bool approved) external nonpayable
 |---|---|---|
 | operator | address | undefined |
 | approved | bool | undefined |
-
-### setBaseURI
-
-```solidity
-function setBaseURI(string baseURI) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| baseURI | string | undefined |
 
 ### supportsInterface
 
@@ -521,7 +473,7 @@ function withdrawMoney(address tokenAddress) external nonpayable
 ### wrappedCandy
 
 ```solidity
-function wrappedCandy(uint16 tokenId) external view returns (string)
+function wrappedCandy(uint16 tokenId) external view returns (bytes)
 ```
 
 
@@ -538,7 +490,7 @@ function wrappedCandy(uint16 tokenId) external view returns (string)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | string | A string containing the SVG data for the candy associated with the tokenId, in base64 format |
+| _0 | bytes | A bytes containing the SVG data for the candy associated with the tokenId, in base64 format |
 
 
 

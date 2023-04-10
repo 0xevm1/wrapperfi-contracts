@@ -122,7 +122,6 @@ const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.18",
     settings: {
-      viaIR: true,
       metadata: {
         bytecodeHash: "ipfs",
       },

@@ -165,6 +165,28 @@ function getCandyAttributes(uint8 control, uint16 tokenId) external view returns
 |---|---|---|
 | value | string | undefined |
 
+### getOwnershipData
+
+```solidity
+function getOwnershipData(uint256 tokenId) external view returns (struct IERC721A.TokenOwnership)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| tokenId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | IERC721A.TokenOwnership | undefined |
+
 ### isApprovedForAll
 
 ```solidity
@@ -203,6 +225,22 @@ function mint(uint256 quantity) external payable
 | Name | Type | Description |
 |---|---|---|
 | quantity | uint256 | undefined |
+
+### modePrice
+
+```solidity
+function modePrice(uint256 price) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| price | uint256 | undefined |
 
 ### name
 
@@ -269,6 +307,17 @@ function renounceOwnership() external nonpayable
 
 
 *Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.*
+
+
+### reveal
+
+```solidity
+function reveal() external nonpayable
+```
+
+
+
+
 
 
 ### safeTransferFrom
@@ -453,6 +502,22 @@ function transferOwnership(address newOwner) external nonpayable
 | Name | Type | Description |
 |---|---|---|
 | newOwner | address | undefined |
+
+### updateAuthorization
+
+```solidity
+function updateAuthorization(uint16 session) external nonpayable
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| session | uint16 | undefined |
 
 ### withdrawMoney
 

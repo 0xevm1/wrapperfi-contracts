@@ -318,10 +318,20 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         }
     }
 
-    /*function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
+    function reveal() external onlyOwner {
+        require(candyCollection.reveal == false, "Reveal event already occurred");
+        candyCollection.reveal = true;
+    }
+
+
+    function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
     {
         return _ownershipOf(tokenId);
-    }*/
+    }
+
+    function modePrice(uint256 price) external onlyOwner {
+        vendingMachine.modePrice = price;
+    }
 
     /*** rescue functions ***/
 
@@ -341,15 +351,12 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         } else {
             (bool success, ) = msg.sender.call{value: address(this).balance}("");
             require(success, "Transfer failed.");
-            //reveal logic is here
-            //require(candyCollection.reveal == false, "Reveal event already occurred");
-            candyCollection.reveal = true;
         }
     }
 
-    /*function updateAuthorization(uint16 session) external onlyOwner nonReentrant {
+    function updateAuthorization(uint16 session) external onlyOwner nonReentrant {
         candyCollection.AUTHORIZATION += session;
-    }*/
+    }
 
     /*** end rescue functions ***/
 
@@ -432,7 +439,7 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
         bytes1[6] memory candyFeatures = unpackAttributes(tokenId * 3);
 
         bytes memory svg = abi.encodePacked(
-            '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"',
+            '<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"',
             'viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">',
                 wrappedCandyGenerateStyleBlock(tokenId),
                 wrappedCandyGenerateCandyBlock(candyFeatures, tokenId),
@@ -444,7 +451,6 @@ contract CandyWrapper is ERC721A, Ownable, ReentrancyGuard {
                 "data:image/svg+xml;base64,",
                 Base64.encode(svg)
                );
-
     }
 
     function wrappedCandyGenerateStyleBlock(uint16 tokenId) internal view returns (bytes memory){

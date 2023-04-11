@@ -42,9 +42,9 @@
 		}
 
 		@keyframes floating{
-			0% {transform: translate(0,0px);}
-			50%  {transform: translate(0,15px);}
-			100%   {transform: translate(0,-0px);}
+			0%{transform:translate(0,0px);}
+			50%{transform:translate(0,15px);}
+			100%{transform:translate(0,-0px);}
 		}
 
 		.floatingdelay{
@@ -56,9 +56,9 @@
 		}
 
 		@keyframes floatingdelay{
-			0% {transform: translate(0,0px);}
-			50%  {transform: translate(0,30px);}
-			100%   {transform: translate(0,-0px);}
+			0%{transform:translate(0,0px);}
+			50%{transform:translate(0,30px);}
+			100%{transform:translate(0,-0px);}
 		}
 	</style>
 	<rect class="st0" fill="url(#darkGradient)" stroke="url(#largeGradient)" rx="15" width="800" height="800"/>
@@ -67,7 +67,7 @@
 		<path id="st3bg" class="st3bg" d="M276.6,556.6c42,40.4,84.9,53.9,143.6,49.4c75.4-5.9,171-88.2,168.8-187.3
 			c-1.8-80-41.9-125.6-71.1-146.3c-26.9-19.1-68.6-45.6-132-38.9c-76.1,8-167.2,87.2-167.8,182.8C217.6,492.7,244.4,525.5,276.6,556.6
 			z"/>
-		<g class="floatingdelay" style="opacity: 0;">
+		<g class="floatingdelay" style="opacity: 1;">
 			<text transform="matrix(1 0 0 1 340.6391 363.6001)">
 				<tspan x="0" y="-20.2" class="st7 st8">Sweet smelling</tspan>
 				<tspan x="0" y="20" class="st7 st8">Oozing</tspan>
@@ -78,7 +78,7 @@
 				<tspan x="0" y="160" class="st7 st8" style="font-size: 14px; fill: none;">[ 11100001 11100001 11100001 ]</tspan>
 			</text>
 		</g>
-		<g class="floatingdelay" style="opacity: 1;">
+		<g class="floatingdelay" style="opacity: 0;">
 			<text transform="matrix(1 0 0 1 340.6391 363.6001)">
 					<tspan x="20" y="150" class="st7" style="font-size: 250px;">?</tspan>
 			</text>

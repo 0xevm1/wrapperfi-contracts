@@ -231,7 +231,7 @@ contract CandyWrapper is ERC721A, Ownable {
         block.timestamp >= publicSaleStartTime;
     }
 
-    uint256 public constant AUCTION_START_PRICE = 1 ether;
+    /*uint256 public constant AUCTION_START_PRICE = 1 ether;
     uint256 public constant AUCTION_END_PRICE = 0.15 ether;
     uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 340 minutes;
     uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes;
@@ -244,16 +244,7 @@ contract CandyWrapper is ERC721A, Ownable {
     view
     returns (uint256)
     {
-        /*if (block.timestamp < _saleStartTime) {
-            return AUCTION_START_PRICE;
-        }
-        if (block.timestamp - _saleStartTime >= AUCTION_PRICE_CURVE_LENGTH) {
-            return AUCTION_END_PRICE;
-        } else {
-            uint256 steps = (block.timestamp - _saleStartTime) /
-            AUCTION_DROP_INTERVAL;
-            return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP);
-        }*/
+
     }
 
     function endAuctionAndSetupNonAuctionSaleInfo(
@@ -261,18 +252,12 @@ contract CandyWrapper is ERC721A, Ownable {
         uint64 publicPriceWei,
         uint32 publicSaleStartTime
     ) external onlyOwner {
-        /*saleConfig = SaleConfig(
-            0,
-            publicSaleStartTime,
-            mintlistPriceWei,
-            publicPriceWei,
-            saleConfig.publicSaleKey
-        );*/
+
     }
 
     function setAuctionSaleStartTime(uint32 timestamp) external onlyOwner {
         //saleConfig.auctionSaleStartTime = timestamp;
-    }
+    }*/
 
     receive() external payable {}
 
@@ -350,9 +335,12 @@ contract CandyWrapper is ERC721A, Ownable {
     * easier to acquire and find than a random index. they can simulate random indexes by sending in different tokenIds
     ***/
 
-    function getBackground(uint16 tokenId) internal view returns(uint24[2] memory value){
+    function getBackground(uint16 tokenId) internal view returns(string[2] memory value){
         require(_exists(tokenId), "No Candy.");
-        return candyCollection.attributeBackground[generateAttributes(tokenId)[0]];
+        string[2] memory bg;
+        bg[0] = Strings.toHexString(candyCollection.attributeBackground[generateAttributes(tokenId)[0]][0]);
+        bg[1] = Strings.toHexString(candyCollection.attributeBackground[generateAttributes(tokenId)[0]][1]);
+        return bg;
     }
 
     function generateAttributes(uint256 seed) internal pure returns (uint8[6] memory) {
@@ -369,8 +357,8 @@ contract CandyWrapper is ERC721A, Ownable {
         uint8[6] memory candyFeatures = generateAttributes(tokenId);
 
         if(control == 0){ // background
-            uint24[2] memory background = getBackground(tokenId);
-            return candyCollection.reveal ? string(abi.encodePacked(background[0], background[1], " ")) : "#FFFFFF #000000";
+            string[2] memory background = getBackground(tokenId);
+            return candyCollection.reveal ? string(abi.encodePacked('#', background[0], ' #', background[1])) : "#FFFFFF #000000";
         } else if(control == 1){ // wrapper ends
             return candyCollection.reveal ? Strings.toHexString(candyCollection.attributeWrapperEnds[candyFeatures[1]]) : "000000";
         } else if(control == 2){ //wrapper highlights
@@ -385,10 +373,7 @@ contract CandyWrapper is ERC721A, Ownable {
             uint16 index = candyFeatures[0];
 
             //can do even and odd variations here to add variation
-            string memory description = string.concat(candyCollection.descriptorA[index], " ");
-            description = string.concat(description, candyCollection.descriptorB[tokenId % 2 == 0 ? index : generateAttributes(index)[0]]); //else condition is a derivative, for entropy
-            description = string.concat(description, " ");
-            description = string.concat(description, candyCollection.descriptorC[index]);
+            string memory description = string(abi.encodePacked(candyCollection.descriptorA[index], ' ', candyCollection.descriptorB[tokenId % 2 == 0 ? index : generateAttributes(index)[0]], ' ', candyCollection.descriptorC[index])); //else condition is a derivative, for entropy
 
             return description;
         } else {
@@ -446,31 +431,31 @@ contract CandyWrapper is ERC721A, Ownable {
                         '.st4{fill:#', getCandyAttributes(4, tokenId),';}',
                         '.st5{opacity:0.5;fill:#', getCandyAttributes(5, tokenId),';}',
                         '.st6{fill:none;}',
-                        '.st7{font-family:\'Impact\'; opacity: 1; -webkit-text-stroke: 2px white; fill:#', candyCollection.reveal ? getCandyAttributes(3, tokenId) : "FFFFFF",'; stroke:#', candyCollection.reveal ? getCandyAttributes(3, tokenId) : "FFFFFF",';}',
+                        '.st7{font-family:\'Impact\'; opacity:1; -webkit-text-stroke: 2px white; fill:#', candyCollection.reveal ? getCandyAttributes(4, tokenId) : "FFFFFF",'; stroke:#', candyCollection.reveal ? getCandyAttributes(2, tokenId) : "FFFFFF",';}',
                         '.st8{font-size:30px;}',
                         '.st3bg{fill:#', getCandyAttributes(3, tokenId),';}',
                         '',
-                        '.fade-in-path {',
-                        'opacity: 100%;',
-                        'transition: 0.5s;',
+                        '.fade-in-path{',
+                        'opacity:100%;',
+                        'transition:0.5s;',
                         '}',
                         '',
-                        '.fade-in-path:hover {',
-                        'opacity: 20%;',
-                        'transition: opacity 1s;',
+                        '.fade-in-path:hover{',
+                        'opacity:20%;',
+                        'transition:opacity 1s;',
                         '}',
-                        '.fade-in-path:active {',
-                        'opacity: 20%;',
-                        'transition: opacity 1s;',
-                        '}',
-                        '',
-                        '@keyframes opacity {',
-                        '  15% {opacity: 1}',
-                        '  35% {opacity: 1}',
-                        '  65% {opacity: 0}',
+                        '.fade-in-path:active{',
+                        'opacity:20%;',
+                        'transition:opacity 1s;',
                         '}',
                         '',
-                        '.f {',
+                        '@keyframes opacity{',
+                        '  15% {opacity:1}',
+                        '  35% {opacity:1}',
+                        '  65% {opacity:0}',
+                        '}',
+                        '',
+                        '.f{',
                         'animation-name: f;',
                         'animation-duration: 3s;',
                         'animation-iteration-count: infinite;',
@@ -479,10 +464,10 @@ contract CandyWrapper is ERC721A, Ownable {
                         'margin-top: 5px;',
                         '}',
                         '',
-                        '@keyframes f {',
-                        '0% { transform: translate(0,  0px); }',
-                        '50%  { transform: translate(0, 15px); }',
-                        '100%   { transform: translate(0, -0px); }',
+                        '@keyframes f{',
+                        '0%{transform:translate(0,0px);}',
+                        '50%{transform:translate(0,15px);}',
+                        '100%{ transform:translate(0,-0px);}',
                         '}',
                         '',
                         '.fd {',
@@ -494,9 +479,9 @@ contract CandyWrapper is ERC721A, Ownable {
                         '}',
                         '',
                         '@keyframes fd {',
-                        '0% { transform: translate(0, 0px);}',
-                        '50%  { transform: translate(0, 30px); }',
-                        '100%   { transform: translate(0, -0px); }',
+                        '0%{transform:translate(0,0px);}',
+                        '50%{transform:translate(0,30px);}',
+                        '100%{transform:translate(0,-0px);}',
                         '}',
                         '</style>'
         );
@@ -507,7 +492,7 @@ contract CandyWrapper is ERC721A, Ownable {
         //used exclusively for descriptors
         uint16 index = candyFeatures[0];
         string memory daoCount = Strings.toString(candyCollection.daoRegistryCount[uint16(tokenId)]);
-        string memory NFTID = Strings.toString(tokenId);
+        string memory NFTID = Strings.toString(tokenId+1);
         string[6] memory barcode = bytesToBinaryString([bytes1(candyFeatures[0]), bytes1(candyFeatures[1]), bytes1(candyFeatures[2]),
                                                 bytes1(candyFeatures[3]), bytes1(candyFeatures[4]), bytes1(candyFeatures[5])]);
 
@@ -580,11 +565,11 @@ contract CandyWrapper is ERC721A, Ownable {
         return abi.encodePacked(
                 '<defs>',
                 '<linearGradient id="d" x1="30%" y1="70%">',
-                '<stop offset="0%" stop-color="#', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'000000','">',
-                '  <animate attributeName="stop-color" values="#', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'000000',';#', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'ffffff',';" dur="1.5s" repeatCount="1" fill="freeze"/>',
+                '<stop offset="0%" stop-color="#', candyCollection.reveal ? getBackground(tokenId)[0] :'000000','">',
+                '  <animate attributeName="stop-color" values="#', candyCollection.reveal ? getBackground(tokenId)[0]:'000000',';#', candyCollection.reveal ? getBackground(tokenId)[1]:'ffffff',';" dur="1.5s" repeatCount="1" fill="freeze"/>',
                 '</stop>',
-                '<stop offset="100%" stop-color="', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'#ffffff','">',
-                '  <animate attributeName="stop-color" values="#', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[1]):'ffffff',';#', candyCollection.reveal ? Strings.toString(getBackground(tokenId)[0]):'000000','" dur="3s" fill="freeze" />',
+                '<stop offset="100%" stop-color="', candyCollection.reveal ? getBackground(tokenId)[1] :'#ffffff','">',
+                '  <animate attributeName="stop-color" values="#', candyCollection.reveal ? getBackground(tokenId)[1]:'ffffff',';#', candyCollection.reveal ? getBackground(tokenId)[0]:'000000','" dur="3s" fill="freeze" />',
                 '</stop>',
                 '</linearGradient>',
                 '</defs>'
@@ -601,20 +586,19 @@ contract CandyWrapper is ERC721A, Ownable {
         //st4 is stripes
         //st5 is wrapper outer body
 
-        string memory background = string.concat(Strings.toString(getBackground(uint16(tokenId))[0]), " ");
-        background = string.concat(background, Strings.toString(getBackground(uint16(tokenId))[1]));
+        string memory background = string(abi.encodePacked('#', getBackground(uint16(tokenId))[0], ' #', getBackground(uint16(tokenId))[1]));
 
         string memory daoCount = Strings.toString(candyCollection.daoRegistryCount[uint16(tokenId)]);
 
         bytes memory dataURI = abi.encodePacked(
             '{',
-                '"name": "Candy #', Strings.toString(tokenId), ': ', getCandyAttributes(6, uint16(tokenId)), '",',
+                '"name": "Candy #', Strings.toString(tokenId+1), ': ', getCandyAttributes(6, uint16(tokenId)), '",',
                 '"description": "Candy",',
                 '"image": "', candyCollection.uriMode[uint16(tokenId)] ? super.tokenURI(tokenId) : wrappedCandy(uint16(tokenId)), '"', //do conditional baseUri here ownerTokenIdToIndex[msg.sender][tokenId]
                 '"attributes": [',
                     '{',
                         '"trait_type": "Name",',
-                        '"value": "#', getCandyAttributes(6, uint16(tokenId)), '"',
+                        '"value": "', getCandyAttributes(6, uint16(tokenId)), '"',
                     '},',
                     '{',
                         '"trait_type": "Background",',

@@ -10,91 +10,6 @@
 
 ## Methods
 
-### AUCTION_DROP_INTERVAL
-
-```solidity
-function AUCTION_DROP_INTERVAL() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### AUCTION_DROP_PER_STEP
-
-```solidity
-function AUCTION_DROP_PER_STEP() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### AUCTION_END_PRICE
-
-```solidity
-function AUCTION_END_PRICE() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### AUCTION_PRICE_CURVE_LENGTH
-
-```solidity
-function AUCTION_PRICE_CURVE_LENGTH() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
-### AUCTION_START_PRICE
-
-```solidity
-function AUCTION_START_PRICE() external view returns (uint256)
-```
-
-
-
-
-
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
-
 ### allowlistMint
 
 ```solidity
@@ -123,22 +38,6 @@ function approve(address to, uint256 tokenId) external payable
 | to | address | undefined |
 | tokenId | uint256 | undefined |
 
-### auctionMint
-
-```solidity
-function auctionMint(uint256 quantity) external payable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| quantity | uint256 | undefined |
-
 ### balanceOf
 
 ```solidity
@@ -161,24 +60,6 @@ function balanceOf(address owner) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### endAuctionAndSetupNonAuctionSaleInfo
-
-```solidity
-function endAuctionAndSetupNonAuctionSaleInfo(uint64 mintlistPriceWei, uint64 publicPriceWei, uint32 publicSaleStartTime) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| mintlistPriceWei | uint64 | undefined |
-| publicPriceWei | uint64 | undefined |
-| publicSaleStartTime | uint32 | undefined |
-
 ### getApproved
 
 ```solidity
@@ -200,28 +81,6 @@ function getApproved(uint256 tokenId) external view returns (address)
 | Name | Type | Description |
 |---|---|---|
 | _0 | address | undefined |
-
-### getAuctionPrice
-
-```solidity
-function getAuctionPrice(uint256 _saleStartTime) external view returns (uint256)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| _saleStartTime | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | uint256 | undefined |
 
 ### getCandyAttributes
 
@@ -463,22 +322,6 @@ function setApprovalForAll(address operator, bool approved) external nonpayable
 |---|---|---|
 | operator | address | undefined |
 | approved | bool | undefined |
-
-### setAuctionSaleStartTime
-
-```solidity
-function setAuctionSaleStartTime(uint32 timestamp) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| timestamp | uint32 | undefined |
 
 ### setdaoRegistry
 

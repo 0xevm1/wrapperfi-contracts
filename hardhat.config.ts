@@ -9,6 +9,7 @@ import "@primitivefi/hardhat-dodoc";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 import 'hardhat-tracer';
+import {utils} from "ethers";
 
 dotenv.config();
 
@@ -211,6 +212,12 @@ config.networks = {
   ...config.networks,
   hardhat: {
     chainId: 1337,
+    accounts: [
+      {
+        privateKey: testPrivateKey,
+        balance: utils.parseEther('10000').toString()
+      }
+    ]
   },
 };
 

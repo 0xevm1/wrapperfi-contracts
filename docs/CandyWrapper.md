@@ -161,24 +161,6 @@ function balanceOf(address owner) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### config
-
-```solidity
-function config(uint8 control, uint16 session, string baseURI) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| control | uint8 | undefined |
-| session | uint16 | undefined |
-| baseURI | string | undefined |
-
 ### endAuctionAndSetupNonAuctionSaleInfo
 
 ```solidity
@@ -241,28 +223,6 @@ function getAuctionPrice(uint256 _saleStartTime) external view returns (uint256)
 |---|---|---|
 | _0 | uint256 | undefined |
 
-### getBackground
-
-```solidity
-function getBackground(uint16 tokenId) external view returns (uint24[2] value)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint16 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| value | uint24[2] | undefined |
-
 ### getCandyAttributes
 
 ```solidity
@@ -285,28 +245,6 @@ function getCandyAttributes(uint8 control, uint16 tokenId) external view returns
 | Name | Type | Description |
 |---|---|---|
 | value | string | undefined |
-
-### getOwnershipData
-
-```solidity
-function getOwnershipData(uint256 tokenId) external view returns (struct IERC721A.TokenOwnership)
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| tokenId | uint256 | undefined |
-
-#### Returns
-
-| Name | Type | Description |
-|---|---|---|
-| _0 | IERC721A.TokenOwnership | undefined |
 
 ### isApprovedForAll
 

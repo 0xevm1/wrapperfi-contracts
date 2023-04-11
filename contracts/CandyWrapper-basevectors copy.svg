@@ -125,10 +125,10 @@
 	<defs>
 		<linearGradient id="darkGradient" x1="30%" y1="70%">
 			<stop offset="0%" stop-color="#000000">
-			  <animate attributeName="stop-color" values="#000000; #ffffff;" dur="1.5s" repeatCount="1" fill="freeze"/>
+			  <animate attributeName="stop-color" values="#000000;#ffffff;" dur="1.5s" repeatCount="1" fill="freeze"/>
 			</stop>
 			<stop offset="100%" stop-color="#ffffff">
-			  <animate attributeName="stop-color" values="#ffffff; #000000" dur="3s" fill="freeze" />
+			  <animate attributeName="stop-color" values="#ffffff;#000000;" dur="3s" fill="freeze" />
 			</stop>
 		</linearGradient>
 	</defs>

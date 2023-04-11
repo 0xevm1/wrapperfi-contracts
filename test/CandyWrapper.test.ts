@@ -3,6 +3,7 @@ import { ethers } from "hardhat";
 import { CandyWrapper } from "../typechain/contracts/CandyWrapper";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { BigNumber } from "ethers";
+import {atob, btoa} from "buffer";
 
 describe("CandyWrapper", function () {
     let CandyWrapperFactory: ethers.ContractFactory;
@@ -14,7 +15,7 @@ describe("CandyWrapper", function () {
 
     beforeEach(async function () {
 
-        let attributes = `0x`;
+        /*let attributes = `0x`;
 
         function doubleDecimalToBinary(a: BigNumber, b: BigNumber, offset_a: number): BigNumber {
             let binaryPrimer = '00000000';
@@ -47,7 +48,7 @@ describe("CandyWrapper", function () {
             byteArray.push(doubleDecimalToBinary(BigNumber.from(getRandomInt(0, 9)), BigNumber.from(getRandomInt(0, 9)),4).toHexString());
         }
 
-        const solidityBytes = "0x" + ethers.utils.hexConcat(byteArray).substring(2);
+        const solidityBytes = "0x" + ethers.utils.hexConcat(byteArray).substring(2);*/
 
         CandyWrapperFactory = await ethers.getContractFactory("CandyWrapper");
         [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
@@ -75,6 +76,40 @@ describe("CandyWrapper", function () {
 
            expect(indexA).to.not.deep.equal(indexB);
         });*/
+    });
+
+    describe("TokenURI", async function () {
+       it( "Mint 1 NFT & Display Unrevealed URI and then Revealed Uri", async function () {
+           let quantity: number = 1;
+           const amount: BigNumber = ethers.utils.parseEther((1 * quantity).toString());
+
+            await candyWrapper.mint(1, {value: amount}).then();
+
+            //check that it is minted
+            let balance: BigNumber = await candyWrapper.balanceOf(owner.address);
+            console.log("minter balance: ", balance);
+            await expect(balance).to.equal(BigNumber.from(quantity));
+
+            //get uri
+           let unrevealedURI: string = await candyWrapper.tokenURI(0);
+            console.log("Pre-reveal: ", unrevealedURI);
+
+            //use withdraw money function to reveal
+            await candyWrapper.withdrawMoney(owner.address);
+
+            let postRevealURI: string = await candyWrapper.tokenURI(0);
+           console.log("Post-reveal: ", postRevealURI);
+
+           expect(unrevealedURI).to.not.equal(postRevealURI);
+        });
+
+        it("Retrieve unrevealed SVG from index 0", async function () {
+
+
+
+
+        });
+
     });
 
 

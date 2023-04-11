@@ -431,7 +431,7 @@ contract CandyWrapper is ERC721A, Ownable {
                         '.st4{fill:#', getCandyAttributes(4, tokenId),';}',
                         '.st5{opacity:0.5;fill:#', getCandyAttributes(5, tokenId),';}',
                         '.st6{fill:none;}',
-                        '.st7{font-family:\'Impact\'; opacity:1; -webkit-text-stroke: 2px white; fill:#', candyCollection.reveal ? getCandyAttributes(4, tokenId) : "FFFFFF",'; stroke:#', candyCollection.reveal ? getCandyAttributes(2, tokenId) : "FFFFFF",';}',
+                        '.st7{font-family:\'Impact\'; opacity:1; -webkit-text-stroke: 2px white; fill:#', candyCollection.reveal ? getCandyAttributes(5, tokenId) : "FFFFFF",'; stroke:#', candyCollection.reveal ? getCandyAttributes(2, tokenId) : "FFFFFF",';}',
                         '.st8{font-size:30px;}',
                         '.st3bg{fill:#', getCandyAttributes(3, tokenId),';}',
                         '',

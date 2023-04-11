@@ -87,27 +87,39 @@ describe("CandyWrapper", function () {
 
             //check that it is minted
             let balance: BigNumber = await candyWrapper.balanceOf(owner.address);
-            console.log("minter balance: ", balance);
+            //console.log("minter balance: ", balance);
             await expect(balance).to.equal(BigNumber.from(quantity));
 
             //get uri
            let unrevealedURI: string = await candyWrapper.tokenURI(0);
-            console.log("Pre-reveal: ", unrevealedURI);
+            //console.log("Pre-reveal: ", unrevealedURI);
 
             //use withdraw money function to reveal
             await candyWrapper.withdrawMoney(owner.address);
 
             let postRevealURI: string = await candyWrapper.tokenURI(0);
-           console.log("Post-reveal: ", postRevealURI);
+           //console.log("Post-reveal: ", postRevealURI);
 
            expect(unrevealedURI).to.not.equal(postRevealURI);
+
+           //expect tokenId 1 to fail
+           await expect(candyWrapper.tokenURI(1)).to.be.revertedWith("No Candy.");
         });
 
-        it("Retrieve unrevealed SVG from index 0", async function () {
+        it("Mint 5 SVGs", async function () {
+            let quantity: number = 5;
+            const amount: BigNumber = ethers.utils.parseEther((1 * quantity).toString());
 
+            await candyWrapper.mint(quantity, {value: amount});
 
+            let balance: BigNumber = await candyWrapper.balanceOf(owner.address);
 
+            await expect(balance).to.equal(BigNumber.from(quantity));
 
+            await candyWrapper.withdrawMoney(owner.address);
+
+            let postRevealURI: string = await candyWrapper.tokenURI(4);
+            console.log("Post-reveal: ", postRevealURI);
         });
 
     });

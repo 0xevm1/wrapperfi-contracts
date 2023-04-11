@@ -91,12 +91,6 @@ contract CandyWrapper is ERC721A, Ownable {
 
     Candy private candyCollection;
 
-    /*** can be general config function **/
-    /*function config(uint8 control, uint16 session, string memory baseURI) external onlyOwner {
-        if(control == 1) candyCollection.AUTHORIZATION += session;
-        else if(control == 2) candyCollection.baseTokenURI = baseURI;
-    }*/
-
     function setdaoRegistry(uint16[] calldata tokenId, uint8[] calldata count) external onlyOwner {
         require(tokenId.length == count.length, "Same length necessary.");
 
@@ -112,6 +106,25 @@ contract CandyWrapper is ERC721A, Ownable {
             let image := or(part1, part2)
         }
         uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
+
+        /***
+            configure dutch auction here, hardcode configurations
+
+            add these to struct, set them in constructor, no getters just make client side follow the same rules
+            uint256 public constant AUCTION_START_PRICE = 1 ether;
+            uint256 public constant AUCTION_END_PRICE = 0.15 ether;
+            uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 340 minutes;
+            uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes;
+            uint256 public constant AUCTION_DROP_PER_STEP =
+            (AUCTION_START_PRICE - AUCTION_END_PRICE) /
+            (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL);
+
+            configure allowlist here, the whitelist, pass into constructor no setter
+
+            configure baseURI here, no setter
+
+
+        ***/
 
         candyCollection.AUTHORIZATION = uint16(key & 0xffffffff); //AUTHORIZATION variable
         candyCollection.reveal = false;
@@ -195,17 +208,6 @@ contract CandyWrapper is ERC721A, Ownable {
         return fill;
     }
 
-    function seedAllowlist(bool referrals, address[] memory addresses, uint16[] memory numSlots) external onlyOwner
-    {
-        require(
-            addresses.length == numSlots.length,
-            "Mismatch"
-        );
-        for (uint256 i = 0; i < addresses.length; i++) {
-            candyCollection.allowlist[addresses[i]] = numSlots[i];
-        }
-    }
-
     function allowlistMint() external payable callerIsUser {
         uint256 price = uint256(0);//vendingMachine.mintlistPrice);
         require(price != 0, "Wait");
@@ -231,14 +233,9 @@ contract CandyWrapper is ERC721A, Ownable {
         block.timestamp >= publicSaleStartTime;
     }
 
-    /*uint256 public constant AUCTION_START_PRICE = 1 ether;
-    uint256 public constant AUCTION_END_PRICE = 0.15 ether;
-    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 340 minutes;
-    uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes;
-    uint256 public constant AUCTION_DROP_PER_STEP =
-    (AUCTION_START_PRICE - AUCTION_END_PRICE) /
-    (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL);
 
+
+    /*
     function getAuctionPrice(uint256 _saleStartTime)
     public
     view
@@ -322,18 +319,6 @@ contract CandyWrapper is ERC721A, Ownable {
     }
 
     /*** end rescue functions ***/
-
-    /*** attribute functions to publicly and programmatically retrieve attributes, for outside and community applications
-    * //st0 is background
-    * //st1 is wrapper ends
-    * //st2 is highlights
-    * //st3 is wrapper body
-    * //st4 is stripes
-    * //st5 is wrapper outer body
-    *
-    * redundant things are declared, but the user needs to be able to pass in a tokenId independently, which would be
-    * easier to acquire and find than a random index. they can simulate random indexes by sending in different tokenIds
-    ***/
 
     function getBackground(uint16 tokenId) internal view returns(string[2] memory value){
         require(_exists(tokenId), "No Candy.");
@@ -492,7 +477,7 @@ contract CandyWrapper is ERC721A, Ownable {
         //used exclusively for descriptors
         uint16 index = candyFeatures[0];
         string memory daoCount = Strings.toString(candyCollection.daoRegistryCount[uint16(tokenId)]);
-        string memory NFTID = Strings.toString(tokenId+1);
+        string memory NFTID = Strings.toString(tokenId);
         string[6] memory barcode = bytesToBinaryString([bytes1(candyFeatures[0]), bytes1(candyFeatures[1]), bytes1(candyFeatures[2]),
                                                 bytes1(candyFeatures[3]), bytes1(candyFeatures[4]), bytes1(candyFeatures[5])]);
 
@@ -511,7 +496,7 @@ contract CandyWrapper is ERC721A, Ownable {
                         '<tspan x="0" y="100" class="st7 st8" style="font-size: 18px;">NFT ID: ', NFTID ,'</tspan>',
                         '<tspan x="0" y="120" class="st7 st8" style="font-size: 18px;">DAOs Registered: ', daoCount, '</tspan>',
                         '<tspan x="0" y="140" class="st7 st8" style="font-size: 14px; fill: none;">[ ',barcode[0],' ',barcode[1],' ',barcode[2],' ]</tspan>',
-                        //'<tspan x="0" y="140" class="st7 st8" style="font-size: 14px; fill: none;">[ ',barcode[3],' ',barcode[4],' ',barcode[5],' ]</tspan>',
+                        '<tspan x="0" y="160" class="st7 st8" style="font-size: 14px; fill: none;">[ ',barcode[3],' ',barcode[4],' ',barcode[5],' ]</tspan>',
                         '</text>',
                         '</g>',
                         '<g class="fd" style="opacity: ',candyCollection.reveal ?'0':'1',';">',
@@ -576,6 +561,45 @@ contract CandyWrapper is ERC721A, Ownable {
             );
     }
 
+    function wrappedCandyAttributes(string memory background, string memory daoCount, uint16 tokenId) internal view returns (bytes memory){
+        return abi.encodePacked(
+                '"attributes": [',
+                '{',
+                '"trait_type": "Name",',
+                '"value": "', getCandyAttributes(6, uint16(tokenId)), '"',
+                '},',
+                '{',
+                '"trait_type": "Background",',
+                '"value": "', candyCollection.reveal ? background: "#FFFFFF #000000", '"',
+                '},',
+                '{',
+                '"trait_type": "Twist Ties",',
+                '"value": "#', getCandyAttributes(1, uint16(tokenId)) , '"',
+                '},'
+                '{',
+                '"trait_type": "Accent",',
+                '"value": "#', getCandyAttributes(2, uint16(tokenId)) , '"',
+                '},'
+                '{',
+                '"trait_type": "Body",',
+                '"value": "#', getCandyAttributes(3, uint16(tokenId)) , '"',
+                '},'
+                '{',
+                '"trait_type": "Stripes",',
+                '"value": "#', getCandyAttributes(4, uint16(tokenId)) , '"',
+                '},'
+                '{',
+                '"trait_type": "Outline",',
+                '"value": "#', getCandyAttributes(5, uint16(tokenId)) , '"',
+                '},',
+                '{',
+                '"trait_type": "DAOs Registered",',
+                '"value": "', daoCount , '"'
+                '}',
+                ']'
+        );
+    }
+
     //on PFPMode, use super
     function tokenURI(uint256 tokenId) override public view returns (string memory){
         require(_exists(tokenId), "No Candy.");
@@ -592,43 +616,10 @@ contract CandyWrapper is ERC721A, Ownable {
 
         bytes memory dataURI = abi.encodePacked(
             '{',
-                '"name": "Candy #', Strings.toString(tokenId+1), ': ', getCandyAttributes(6, uint16(tokenId)), '",',
-                '"description": "Candy",',
-                '"image": "', candyCollection.uriMode[uint16(tokenId)] ? super.tokenURI(tokenId) : wrappedCandy(uint16(tokenId)), '"', //do conditional baseUri here ownerTokenIdToIndex[msg.sender][tokenId]
-                '"attributes": [',
-                    '{',
-                        '"trait_type": "Name",',
-                        '"value": "', getCandyAttributes(6, uint16(tokenId)), '"',
-                    '},',
-                    '{',
-                        '"trait_type": "Background",',
-                        '"value": "', candyCollection.reveal ? background: "#FFFFFF #000000", '"',
-                    '},',
-                    '{',
-                        '"trait_type": "Twist Ties",',
-                        '"value": "#', getCandyAttributes(1, uint16(tokenId)) , '"',
-                    '},'
-                    '{',
-                        '"trait_type": "Accent",',
-                        '"value": "#', getCandyAttributes(2, uint16(tokenId)) , '"',
-                    '},'
-                    '{',
-                        '"trait_type": "Body",',
-                        '"value": "#', getCandyAttributes(3, uint16(tokenId)) , '"',
-                    '},'
-                    '{',
-                        '"trait_type": "Stripes",',
-                        '"value": "#', getCandyAttributes(4, uint16(tokenId)) , '"',
-                    '},'
-                    '{',
-                        '"trait_type": "Outline",',
-                        '"value": "#', getCandyAttributes(5, uint16(tokenId)) , '"',
-                    '},',
-                    '{',
-                        '"trait_type": "DAOs Registered",',
-                        '"value": "', daoCount , '"'
-                    '}',
-                ']',
+                '"name": "Candy #', Strings.toString(tokenId), ': ', getCandyAttributes(6, uint16(tokenId)), '",',
+                '"description": ', unicode"🍬 wrapper.fi 🍬 Candy NFT Collection on Chain ID: ", Strings.toString(block.chainid),'"',// ,
+                '"image": "', candyCollection.uriMode[uint16(tokenId)] ? super.tokenURI(tokenId) : wrappedCandy(uint16(tokenId)), '",', //do conditional baseUri here ownerTokenIdToIndex[msg.sender][tokenId]
+                wrappedCandyAttributes(background, daoCount, uint16(tokenId)),
             '}'
         );
 

@@ -118,8 +118,10 @@ describe("CandyWrapper", function () {
 
             await candyWrapper.withdrawMoney(owner.address);
 
-            let postRevealURI: string = await candyWrapper.tokenURI(4);
-            console.log("Post-reveal: ", postRevealURI);
+            console.log("Post-reveal: ", await candyWrapper.tokenURI(1));
+            console.log("Post-reveal: ", await candyWrapper.tokenURI(2));
+            console.log("Post-reveal: ", await candyWrapper.tokenURI(3));
+            console.log("Post-reveal: ", await candyWrapper.tokenURI(4));
         });
 
     });

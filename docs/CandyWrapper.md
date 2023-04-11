@@ -288,24 +288,6 @@ function safeTransferFrom(address from, address to, uint256 tokenId, bytes _data
 | tokenId | uint256 | undefined |
 | _data | bytes | undefined |
 
-### seedAllowlist
-
-```solidity
-function seedAllowlist(bool referrals, address[] addresses, uint16[] numSlots) external nonpayable
-```
-
-
-
-
-
-#### Parameters
-
-| Name | Type | Description |
-|---|---|---|
-| referrals | bool | undefined |
-| addresses | address[] | undefined |
-| numSlots | uint16[] | undefined |
-
 ### setApprovalForAll
 
 ```solidity

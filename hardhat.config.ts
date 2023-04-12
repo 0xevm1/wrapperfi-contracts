@@ -131,12 +131,7 @@ const config: HardhatUserConfig = {
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
         enabled: true,
-        runs: 1,
-        details: {
-          yulDetails: {
-            optimizerSteps: "u",
-          },
-        },
+        runs: 1
       },
     },
   },

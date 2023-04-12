@@ -62,22 +62,20 @@ contract CandyWrapper is ERC721A, Ownable {
         require(_exists(tokenId), "No Candy.");
     }
 
-    //st0 is background
-    //st1 is wrapper ends
-    //st2 is highlights
-    //st3 is wrapper body
-    //st4 is stripes
-    //st5 is wrapper outer body
     struct Candy {
+        //one slot
         uint16 AUTHORIZATION;
-        bool reveal; //default false
-        uint8 maxPerAddressDuringMint;
+        uint16 reserve;
         uint32 auctionSaleStartTime;
         uint32 publicSaleStartTime;
         uint64 mintlistPrice;
         uint64 publicPrice;
         uint32 publicSaleKey;
         uint64 modePrice;
+
+        //next slots
+        uint8 maxPerAddressDuringMint;
+        bool reveal; //default false
         string baseTokenURI; //metadata URI
         uint24[10] attributeWrapperEnds;
         uint24[10] attributeWrapperHighlights;
@@ -88,10 +86,19 @@ contract CandyWrapper is ERC721A, Ownable {
         string[10] descriptorB;
         string[10] descriptorC;
         mapping(uint8 => uint24[2]) attributeBackground;
-        mapping(address => uint16) allowlist;
         mapping(uint16 => uint8) daoRegistryCount; //referrals system
         mapping(uint16 => bool) uriMode;
     }
+
+    mapping(address => uint16) public allowlist;
+
+    uint256 public constant AUCTION_START_PRICE = 1 ether;
+    uint256 public constant AUCTION_END_PRICE = 0.1 ether;
+    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 10080 minutes;
+    uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes;
+    uint256 public constant AUCTION_DROP_PER_STEP =
+        (AUCTION_START_PRICE - AUCTION_END_PRICE) /
+        (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL);
 
     Candy private candyCollection;
 
@@ -103,7 +110,7 @@ contract CandyWrapper is ERC721A, Ownable {
         }
     }
 
-    constructor() ERC721A("Candy", "CANDY"){
+    constructor(uint8 maxBatchSize_, uint8 reserve) ERC721A("Candy", "CANDY"){
         assembly {
             let part1 := shl(16, 1)
             let part2 := 0xC350
@@ -111,26 +118,23 @@ contract CandyWrapper is ERC721A, Ownable {
         }
         uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
 
-        /***
-            configure dutch auction here, hardcode configurations
+        candyCollection.maxPerAddressDuringMint = maxBatchSize_;
 
-            add these to struct, set them in constructor, no getters just make client side follow the same rules
-            uint256 public constant AUCTION_START_PRICE = 1 ether;
-            uint256 public constant AUCTION_END_PRICE = 0.15 ether;
-            uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 340 minutes;
-            uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes;
-            uint256 public constant AUCTION_DROP_PER_STEP =
-            (AUCTION_START_PRICE - AUCTION_END_PRICE) /
-            (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL);
+        //configure dutch auction here, hardcode configurations
+        //add these to struct, set them in constructor,
+        //no getters just make client side follow the same rules
+        /*candyCollection.AUCTION_START_PRICE = 1 ether;
+        candyCollection.AUCTION_END_PRICE = 0.15 ether;
+        candyCollection.AUCTION_PRICE_CURVE_LENGTH = 340 minutes;
+        candyCollection.AUCTION_DROP_INTERVAL = 20 minutes;
+        candyCollection.AUCTION_DROP_PER_STEP = uint96(
+            (candyCollection.AUCTION_START_PRICE - candyCollection.AUCTION_END_PRICE) /
+            (candyCollection.AUCTION_PRICE_CURVE_LENGTH / candyCollection.AUCTION_DROP_INTERVAL));*/
 
-            configure allowlist here, the whitelist, pass into constructor no setter
-
-            configure baseURI here, no setter
-
-
-        ***/
+        //configure allowlist here, the whitelist, pass into constructor no setter
 
         candyCollection.AUTHORIZATION = uint16(key & 0xffffffff); //AUTHORIZATION variable
+        candyCollection.reserve = reserve;
         candyCollection.reveal = false;
 
         //define attributes
@@ -212,19 +216,81 @@ contract CandyWrapper is ERC721A, Ownable {
         return fill;
     }
 
-    function allowlistMint() external payable callerIsUser {
-        uint256 price = uint256(0);//vendingMachine.mintlistPrice);
-        require(price != 0, "Wait");
-        require(candyCollection.allowlist[msg.sender] > 0, "Not Eligible");
-        require(totalSupply() + 1 <= candyCollection.AUTHORIZATION, "Too much candy.");
-        candyCollection.allowlist[msg.sender]--;
-        _safeMint(msg.sender, 1);
-        refundIfOver(price);
+    function getAuctionPrice(uint256 _saleStartTime) public view returns (uint256)
+    {
+        if (block.timestamp < _saleStartTime) {
+            return AUCTION_START_PRICE;
+        }
+        if (block.timestamp - _saleStartTime >= AUCTION_PRICE_CURVE_LENGTH) {
+            return AUCTION_END_PRICE;
+        } else {
+            uint256 steps = (block.timestamp - _saleStartTime) /
+            AUCTION_DROP_INTERVAL;
+            return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP);
+        }
     }
 
-    /*function auctionMint(uint256 quantity) external payable callerIsUser {
+    function seedAllowlist(address[] memory addresses, uint16[] memory numSlots) external onlyOwner
+    {
+        require(
+            addresses.length == numSlots.length,
+            "Same length necessary."
+        );
+        for (uint256 i = 0; i < addresses.length; i++) {
+            allowlist[addresses[i]] = numSlots[i];
+        }
+    }
 
-    }*/
+    function mint(uint8 control, uint8 quantity) external payable callerIsUser {
+        require(
+            ((totalSupply() + quantity) <= (candyCollection.AUTHORIZATION - candyCollection.reserve))
+            || (_numberMinted(msg.sender) + quantity <= candyCollection.maxPerAddressDuringMint),
+            "Too much Candy."
+        );
+
+        if(control == 0){ //dutch auction mint
+
+            uint256 _saleStartTime = uint256(candyCollection.auctionSaleStartTime);
+            require(
+                _saleStartTime != 0 && block.timestamp >= _saleStartTime,
+                "Sale not active."
+            );
+            uint256 totalCost = getAuctionPrice(_saleStartTime) * quantity;
+            _safeMint(msg.sender, quantity);
+            refundIfOver(totalCost);
+
+        } else if (control == 1){ //public sale mint
+            require(false, "Sale not active.");
+            _safeMint(msg.sender, quantity);
+            refundIfOver(candyCollection.publicPrice * quantity);
+        } else if (control == 2){ //allowlist sale
+            uint256 price = uint256(candyCollection.mintlistPrice);//vendingMachine.mintlistPrice);
+            require(price != 0, "Wait");
+            require(allowlist[msg.sender] > 0, "Not Eligible");
+            require(totalSupply() + 1 <= candyCollection.AUTHORIZATION, "Too much candy.");
+            allowlist[msg.sender]--;
+            _safeMint(msg.sender, 1);
+            refundIfOver(price);
+        } else if (control == 3){ //reserved mint, can occur at any time
+
+        }
+    }
+
+    // For marketing etc.
+    function devMint(uint256 quantity) external onlyOwner {
+        require(
+            totalSupply() + quantity <= candyCollection.reserve,
+            "Too much Candy before this round."
+        );
+        require(
+            quantity % candyCollection.maxPerAddressDuringMint == 0,
+            "can only mint a multiple of the maxBatchSize"
+        );
+        uint256 numChunks = quantity / candyCollection.maxPerAddressDuringMint;
+        for (uint256 i = 0; i < numChunks; i++) {
+            _safeMint(msg.sender, candyCollection.maxPerAddressDuringMint);
+        }
+    }
 
     function isPublicSaleOn(
         uint256 publicPriceWei,
@@ -238,55 +304,21 @@ contract CandyWrapper is ERC721A, Ownable {
     }
 
 
-
-    /*
-    function getAuctionPrice(uint256 _saleStartTime)
-    public
-    view
-    returns (uint256)
-    {
-
-    }
-
     function endAuctionAndSetupNonAuctionSaleInfo(
         uint64 mintlistPriceWei,
         uint64 publicPriceWei,
         uint32 publicSaleStartTime
     ) external onlyOwner {
-
+        candyCollection.mintlistPrice = mintlistPriceWei;
+        candyCollection.publicPrice = publicPriceWei;
+        candyCollection.publicSaleStartTime = publicSaleStartTime;
     }
 
     function setAuctionSaleStartTime(uint32 timestamp) external onlyOwner {
-        //saleConfig.auctionSaleStartTime = timestamp;
-    }*/
+        candyCollection.auctionSaleStartTime = timestamp;
+    }
 
     receive() external payable {}
-
-    function mint(uint256 quantity) external payable callerIsUser {
-
-        uint256 publicPrice = 1 ether;
-        /*Vending memory config = saleConfig;
-        uint256 publicSaleKey = uint256(config.publicSaleKey);
-
-        uint256 publicSaleStartTime = uint256(config.publicSaleStartTime);
-        require(
-            publicSaleKey == callerPublicSaleKey,
-            "called with incorrect public sale key"
-        );
-
-        require(
-            isPublicSaleOn(publicPrice, publicSaleKey, publicSaleStartTime),
-            "public sale has not begun yet"
-        );*/
-
-        require(
-            (totalSupply() + quantity <= candyCollection.AUTHORIZATION) && (_numberMinted(msg.sender) + quantity <= 5),
-            "Too much Candy."
-        );
-
-        _mint(msg.sender, quantity);
-        refundIfOver(publicPrice * quantity);
-    }
 
     function refundIfOver(uint256 price) private {
         require(msg.value >= price, "More ETH"); //if message value is greater than or equal to price, run refund. else, don't run refund because its the correct amount
@@ -295,10 +327,18 @@ contract CandyWrapper is ERC721A, Ownable {
         }
     }
 
-    /*function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
+    function getOwnershipData(uint256 tokenId) external view returns (TokenOwnership memory)
     {
         return _ownershipOf(tokenId);
-    }*/
+    }
+
+    function updateAuthorization(uint16 session) external onlyOwner {
+        candyCollection.AUTHORIZATION += session;
+    }
+
+    function setBaseUri(string memory baseUri) external onlyOwner {
+        candyCollection.baseTokenURI;
+    }
 
     /*** rescue functions ***/
 
@@ -318,8 +358,13 @@ contract CandyWrapper is ERC721A, Ownable {
         } else {
             (bool success, ) = msg.sender.call{value: address(this).balance}("");
             require(success, "Transfer failed.");
-            candyCollection.reveal = true;
+            //candyCollection.reveal = true;
         }
+    }
+
+    function revealCandy() external onlyOwner {
+        candyCollection.reveal;
+        require(candyCollection.reveal, "Already revealed.");
     }
 
     /*** end rescue functions ***/

@@ -8,7 +8,7 @@ The NFT collection is completely onchain and interactive using SVGs. Incorporate
 
 `npx hardhat compile`
 
-Compiling CandyWrapper.sol requires the yulDetails: { optimizerSteps: "u" },setting enabled in hardhat.config.ts, otherwise the normal solidity compiler will return Stack Too Deep. Does not require viaIR: true despite the hardhat/solidity compiler suggesting that solution
+Compiling CandyWrapper.sol requires the yulDetails: { optimizerSteps: "u" },setting enabled in hardhat.config.ts, otherwise the normal solidity compiler will return Stack Too Deep. Requires viaIR: true
 
 TODO:
 
@@ -19,6 +19,8 @@ TODO:
 - [ ] dutch auction contracts, and reserved whitelist at half of initial dutch auction price
 
 - [ ] do deployment scripts
+
+- [ ] do test deployment scripts in hardhat
 
 - [ ] add events and check for existing ones in the imports
 

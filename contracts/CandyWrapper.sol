@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.18;
 
-//import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
@@ -56,6 +55,11 @@ contract CandyWrapper is ERC721A, Ownable {
     modifier callerHasTokenId(uint16 tokenId) {
         require(msg.sender == ownerOf(tokenId), "Not your candy.");
         _;
+    }
+
+    /*was modifier but this increased contract size*/
+    function idCheck(uint16 tokenId) private view {
+        require(_exists(tokenId), "No Candy.");
     }
 
     //st0 is background
@@ -320,8 +324,8 @@ contract CandyWrapper is ERC721A, Ownable {
 
     /*** end rescue functions ***/
 
-    function getBackground(uint16 tokenId) internal view returns(string[2] memory value){
-        require(_exists(tokenId), "No Candy.");
+    function getBackground(uint16 tokenId) internal view returns (string[2] memory value) {
+        idCheck(tokenId);
         string[2] memory bg;
         bg[0] = Strings.toHexString(candyCollection.attributeBackground[generateAttributes(tokenId)[0]][0]);
         bg[1] = Strings.toHexString(candyCollection.attributeBackground[generateAttributes(tokenId)[0]][1]);
@@ -337,8 +341,8 @@ contract CandyWrapper is ERC721A, Ownable {
         return randomValues;
     }
 
-    function getCandyAttributes(uint8 control, uint16 tokenId) public view returns(string memory value){
-        require(_exists(tokenId), "No Candy.");
+    function getCandyAttributes(uint8 control, uint16 tokenId) public view returns(string memory value) {
+        idCheck(tokenId);
         uint8[6] memory candyFeatures = generateAttributes(tokenId);
 
         if(control == 0){ // background
@@ -384,7 +388,7 @@ contract CandyWrapper is ERC721A, Ownable {
      * @return A bytes containing the SVG data for the candy associated with the tokenId, in base64 format
      */
     function wrappedCandy(uint16 tokenId) public view returns(string memory){
-        require(_exists(tokenId), "No Candy.");
+        idCheck(tokenId);
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -602,7 +606,7 @@ contract CandyWrapper is ERC721A, Ownable {
 
     //on PFPMode, use super
     function tokenURI(uint256 tokenId) override public view returns (string memory){
-        require(_exists(tokenId), "No Candy.");
+        idCheck(uint16(tokenId));
         //st0 is background
         //st1 is wrapper ends
         //st2 is highlights
@@ -617,7 +621,7 @@ contract CandyWrapper is ERC721A, Ownable {
         bytes memory dataURI = abi.encodePacked(
             '{',
                 '"name": "Candy #', Strings.toString(tokenId), ': ', getCandyAttributes(6, uint16(tokenId)), '",',
-                '"description": ', unicode"🍬 wrapper.fi 🍬 Candy NFT Collection on Chain ID: ", Strings.toString(block.chainid),'"',// ,
+                '"description": ', unicode'"🍬 wrapper.fi 🍬 Candy NFT Collection on Chain ID: ', Strings.toString(block.chainid),'",',// ,
                 '"image": "', candyCollection.uriMode[uint16(tokenId)] ? super.tokenURI(tokenId) : wrappedCandy(uint16(tokenId)), '",', //do conditional baseUri here ownerTokenIdToIndex[msg.sender][tokenId]
                 wrappedCandyAttributes(background, daoCount, uint16(tokenId)),
             '}'

@@ -94,6 +94,14 @@ describe("CandyWrapper", function () {
            let unrevealedURI: string = await candyWrapper.tokenURI(0);
             //console.log("Pre-reveal: ", unrevealedURI);
 
+           // Remove the data URI prefix
+           let base64String = unrevealedURI.split("base64,")[1];
+           unrevealedURI = (Buffer.from(base64String, 'base64').toString('utf-8'));
+
+           let data = JSON.parse(unrevealedURI);
+
+           console.log(data.image);
+
             //use withdraw money function to reveal
             await candyWrapper.withdrawMoney(owner.address);
 
@@ -118,10 +126,20 @@ describe("CandyWrapper", function () {
 
             await candyWrapper.withdrawMoney(owner.address);
 
-            console.log("Post-reveal: ", await candyWrapper.tokenURI(1));
-            console.log("Post-reveal: ", await candyWrapper.tokenURI(2));
-            console.log("Post-reveal: ", await candyWrapper.tokenURI(3));
-            console.log("Post-reveal: ", await candyWrapper.tokenURI(4));
+
+            //console.log("Pre-reveal: ", unrevealedURI);
+
+            for(let i: number = 0; i < quantity; i++) {
+                // Remove the data URI prefix
+                let unrevealedURI: string = await candyWrapper.tokenURI(i);
+                let base64String = unrevealedURI.split("base64,")[1];
+                unrevealedURI = (Buffer.from(base64String, 'base64').toString('utf-8'));
+
+                let data = JSON.parse(unrevealedURI);
+
+                console.log(data.image);
+            }
+
         });
 
     });

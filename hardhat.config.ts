@@ -8,6 +8,8 @@ import "hardhat-gas-reporter";
 import "@primitivefi/hardhat-dodoc";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
+import 'hardhat-tracer';
+import {utils} from "ethers";
 
 dotenv.config();
 
@@ -119,8 +121,9 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.12",
+    version: "0.8.18",
     settings: {
+      viaIR: true,
       metadata: {
         bytecodeHash: "ipfs",
       },
@@ -128,7 +131,7 @@ const config: HardhatUserConfig = {
       // https://hardhat.org/hardhat-network/#solidity-optimizer-support
       optimizer: {
         enabled: true,
-        runs: 490,
+        runs: 1
       },
     },
   },
@@ -161,15 +164,20 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    coinmarketcap: process.env.REPORT_GAS_COINMARKETCAP_API_KEY,
     currency: "USD",
-    enabled: process.env.REPORT_GAS ? true : false,
+    enabled: true //process.env.REPORT_GAS ? true : false,
   },
   dodoc: {
     runOnCompile: true,
     exclude: ["**/node_modules/**"],
     keepFileStructure: false,
   },
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+  }
 };
 
 if (testPrivateKey) {
@@ -200,7 +208,15 @@ config.networks = {
   ...config.networks,
   hardhat: {
     chainId: 1337,
-  },
+    accounts:
+      {
+        mnemonic: "test test test test test test test test test test test junk",
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+        passphrase: "",
+      }
+  }
 };
 
 export default config;

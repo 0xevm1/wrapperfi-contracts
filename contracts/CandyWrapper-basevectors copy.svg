@@ -1,38 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve">
 	<style type="text/css">
 		/*.st0 is background, which is a gradient*/
-		.st1{fill:#8086FF;} /*wrapper ends*/
+		.st1{fill:#000000;} /*wrapper ends*/
 		.st2{fill:#FFFFFF;} /*highlights*/
-		.st3{fill:#FE7C84;} /*wrapper body*/
-		.st4{fill:#C3C3C3;} /* stripes */
-		.st5{opacity:0.5;fill:#B2B2B2;}
+		.st3{fill:#000000;} /*wrapper body*/
+		.st4{fill:#000000;} /* stripes */
+		.st5{opacity:0.5;fill:#000000;enable-background:new    ;}
 		.st6{fill:none;}
-		.st7{font-family:'Impact'; opacity: 1; -webkit-text-stroke: 2px white; fill: #FE7C84; stroke: #343434;} /*make fill = wrapper body, stroke = stripes*/
+		.st7{font-family:'Impact'; opacity: 1; -webkit-text-stroke: 2px white; fill: #ffffff; stroke: #000000;} /*make fill = wrapper body, stroke = stripes*/
 		.st8{font-size:30px;}
-		.st3bg{fill:#C3C3C3;} /*wrapper body*/
+		.st3bg{fill:#000000;} /*wrapper body*/
 
-		.fade-in-path{
+		.fade-in-path {
 			opacity: 100%;
 			transition: 0.5s;
 		}
 
-		.fade-in-path:hover{
+		.fade-in-path:hover {
 			opacity: 20%;
 			transition: opacity 1s;
 		}
-		.fade-in-path:active{
+		.fade-in-path:active {
 			opacity: 20%;
 			transition: opacity 1s;
 		}
 
-		@keyframes opacity{
+		@keyframes opacity {
 		  15% {opacity: 1}
 		  35% {opacity: 1}
 		  65% {opacity: 0}
+		  85% {opacity: 0}
 		}
 
-		.floating{
+		.floating {
 			animation-name: floating;
 			animation-duration: 3s;
 			animation-iteration-count: infinite;
@@ -41,13 +43,13 @@
 			margin-top: 5px;
 		}
 
-		@keyframes floating{
-			0%{transform:translate(0,0px);}
-			50%{transform:translate(0,15px);}
-			100%{transform:translate(0,-0px);}
+		@keyframes floating {
+			0% { transform: translate(0,  0px); }
+			50%  { transform: translate(0, 15px); }
+			100%   { transform: translate(0, -0px); }
 		}
 
-		.floatingdelay{
+		.floatingdelay {
 			animation-name: floatingdelay;
 			animation-delay: 0.5s;
 			animation-duration: 3s;
@@ -55,10 +57,10 @@
 			animation-timing-function: ease-in-out;
 		}
 
-		@keyframes floatingdelay{
-			0%{transform:translate(0,0px);}
-			50%{transform:translate(0,30px);}
-			100%{transform:translate(0,-0px);}
+		@keyframes floatingdelay {
+			0% { transform: translate(0, 0px);}
+			50%  { transform: translate(0, 30px); }
+			100%   { transform: translate(0, -0px); }
 		}
 	</style>
 	<rect class="st0" fill="url(#darkGradient)" stroke="url(#largeGradient)" rx="15" width="800" height="800"/>
@@ -67,20 +69,14 @@
 		<path id="st3bg" class="st3bg" d="M276.6,556.6c42,40.4,84.9,53.9,143.6,49.4c75.4-5.9,171-88.2,168.8-187.3
 			c-1.8-80-41.9-125.6-71.1-146.3c-26.9-19.1-68.6-45.6-132-38.9c-76.1,8-167.2,87.2-167.8,182.8C217.6,492.7,244.4,525.5,276.6,556.6
 			z"/>
-		<g class="floatingdelay" style="opacity: 1;">
+		<g class="floatingdelay" style="opacity: 0;">
 			<text transform="matrix(1 0 0 1 340.6391 363.6001)">
-				<tspan x="0" y="-20.2" class="st7 st8">Sweet smelling</tspan>
-				<tspan x="0" y="20" class="st7 st8">Oozing</tspan>
-				<tspan x="0" y="63.2" class="st7 st8">Gummies</tspan>
+				<tspan x="0" y="-20.2" class="st7 st8">???</tspan>
+				<tspan x="0" y="20" class="st7 st8">???</tspan>
+				<tspan x="0" y="63.2" class="st7 st8">???</tspan>
 				<tspan x="0" y="100" class="st7 st8" style="font-size: 18px;">NFT ID: 12345</tspan>
 				<tspan x="0" y="120" class="st7 st8" style="font-size: 18px;">DAOs Registered: 0</tspan>
 				<tspan x="0" y="140" class="st7 st8" style="font-size: 14px; fill: none;">[ 11100001 11100001 11100001 ]</tspan>
-				<tspan x="0" y="160" class="st7 st8" style="font-size: 14px; fill: none;">[ 11100001 11100001 11100001 ]</tspan>
-			</text>
-		</g>
-		<g class="floatingdelay" style="opacity: 0;">
-			<text transform="matrix(1 0 0 1 340.6391 363.6001)">
-					<tspan x="20" y="150" class="st7" style="font-size: 250px;">?</tspan>
 			</text>
 		</g>
 		<path id="st1" class="st1" d="M94.6,635c0,0-26.7-4.9-42.1-14.8s-33-26-30.9-30.9s21.7-9.8,61.1-28.1s92.7-49.2,127.8-48.4
@@ -121,13 +117,18 @@
 			L386,233.4z M502.4,293c25.3,18,60,57.4,61.5,126.6c1.9,85.8-80.8,156.9-146.1,162.1c-50.8,4-87.9-7.7-124.2-42.7
 			c-27.9-26.9-51.1-55.3-50.6-121.4c0.5-82.7,79.4-151.3,145.2-158.2C443.1,253.6,479.1,276.5,502.4,293L502.4,293z"/>
 	</g>
+	<g class="floatingdelay" style="opacity: 1;">
+		<text class="floatingdelay" transform="matrix(1 0 0 1 340.6391 363.6001)">
+				<tspan x="20" y="150" class="st7" style="font-size: 250px;">?</tspan>
+		</text>
+	</g>
 	<defs>
 		<linearGradient id="darkGradient" x1="30%" y1="70%">
-			<stop offset="0%" stop-color="#0b2d13">
-			  <animate attributeName="stop-color" values="#0b2d13; #79c98c;" dur="1.5s" repeatCount="1" fill="freeze"/>
+			<stop offset="0%" stop-color="#000000">
+			  <animate attributeName="stop-color" values="#000000;#ffffff;" dur="1.5s" repeatCount="1" fill="freeze"/>
 			</stop>
-			<stop offset="100%" stop-color="#79c98c">
-			  <animate attributeName="stop-color" values="#79c98c; #0b2d13" dur="3s" fill="freeze" />
+			<stop offset="100%" stop-color="#ffffff">
+			  <animate attributeName="stop-color" values="#ffffff;#000000;" dur="3s" fill="freeze" />
 			</stop>
 		</linearGradient>
 	</defs>

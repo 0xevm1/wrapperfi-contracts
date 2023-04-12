@@ -280,7 +280,7 @@ contract CandyWrapper is ERC721A, Ownable {
         );*/
 
         require(
-            (totalSupply() + quantity <= candyCollection.AUTHORIZATION) || (_numberMinted(msg.sender) + quantity <= 5),
+            (totalSupply() + quantity <= candyCollection.AUTHORIZATION) && (_numberMinted(msg.sender) + quantity <= 5),
             "Too much Candy."
         );
 

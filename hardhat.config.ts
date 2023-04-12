@@ -213,13 +213,15 @@ config.networks = {
   ...config.networks,
   hardhat: {
     chainId: 1337,
-    accounts: [
+    accounts:
       {
-        privateKey: testPrivateKey,
-        balance: utils.parseEther('10000').toString()
+        mnemonic: "test test test test test test test test test test test junk",
+        path: "m/44'/60'/0'/0",
+        initialIndex: 0,
+        count: 20,
+        passphrase: "",
       }
-    ]
-  },
+  }
 };
 
 export default config;

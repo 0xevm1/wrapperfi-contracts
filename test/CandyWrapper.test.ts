@@ -137,12 +137,88 @@ describe("CandyWrapper", function () {
 
                 let data = JSON.parse(unrevealedURI);
 
-                console.log(data.image);
+                //console.log(data.image);
             }
 
         });
 
+        it("Mint 20 SVGs between 4 addresses, one mints 6 SVGs which is too many and should fail, another mints 6 betwen two transactions and the second should fail, reveal, update DAO list, check", async function () {
+
+            //address 1
+
+            let quantity: number = 5;
+            let amount: BigNumber = ethers.utils.parseEther((1 * quantity).toString());
+
+            await candyWrapper.connect(addr1).mint(quantity, {value: amount});
+
+            let balance: BigNumber = await candyWrapper.balanceOf(addr1.address);
+
+            await expect(balance).to.equal(BigNumber.from(quantity));
+
+
+            //address 2
+            quantity = 6;
+            amount = ethers.utils.parseEther(((1 * quantity).toString()));
+            await expect(candyWrapper.connect(addr2).mint(quantity, {value: amount})).to.be.revertedWith("Too much Candy.");
+
+            balance = await candyWrapper.balanceOf(addr2.address);
+
+            await expect(balance).to.equal(BigNumber.from(0));
+
+            //address 3
+            quantity = 3;
+            amount = ethers.utils.parseEther(((1 * quantity).toString()));
+            await candyWrapper.connect(addrs[0]).mint(quantity, {value: amount});
+            balance = await candyWrapper.balanceOf(addrs[0].address);
+            //console.log("minter balance: ", balance);
+            await expect(balance).to.equal(BigNumber.from(quantity));
+            quantity = 3;
+            amount = ethers.utils.parseEther(((1 * quantity).toString()));
+            await expect(candyWrapper.connect(addrs[0]).mint(quantity, {value: amount})).to.be.revertedWith("Too much Candy.");
+            balance = await candyWrapper.balanceOf(addrs[0].address);
+            await expect(balance).to.equal(BigNumber.from(quantity));
+
+            //address 4
+            quantity = 5;
+            amount = ethers.utils.parseEther((1 * quantity).toString());
+            await candyWrapper.connect(addrs[1]).mint(quantity, {value: amount});
+            balance = await candyWrapper.balanceOf(addrs[1].address);
+            await expect(balance).to.equal(BigNumber.from(quantity));
+
+            await candyWrapper.withdrawMoney(owner.address);
+
+            let tokenIds: number[] = [4, 7, 12, 11];
+            let referrals: number[] = [1, 5, 100, 0];
+
+            //set DAO Registry
+            await candyWrapper.setdaoRegistry(tokenIds, referrals);
+
+            for (let i: number = 0; i < tokenIds.length; i++){
+                let uri: string = await candyWrapper.tokenURI(tokenIds[i]);
+                let base64String = uri.split("base64,")[1];
+                uri = (Buffer.from(base64String, 'base64').toString('utf-8'));
+
+                let data = JSON.parse(uri);
+
+                expect(data.attributes[7].value).to.equal(referrals[i].toString());
+            }
+
+        });
+
+        it("DAO Referrals to fail from not equal parameter sizes", async function () {
+            let tokenIds: number[] = [4, 7, 12, 11];
+            let referrals: number[] = [1, 5, 100];
+
+            //set DAO Registry
+            await expect(candyWrapper.setdaoRegistry(tokenIds, referrals)).to.be.revertedWith("Same length necessary.");
+        });
+
+        it("DAO Referrals to fail from non-owner access", async function () {
+            let tokenIds: number[] = [4, 7, 12, 11];
+            let referrals: number[] = [1, 5, 100];
+
+            //set DAO Registry
+            await expect(candyWrapper.connect(addr1).setdaoRegistry(tokenIds, referrals)).to.be.revertedWith("Ownable: caller is not the owner");
+        });
     });
-
-
 });

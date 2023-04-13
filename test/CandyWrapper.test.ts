@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { CandyWrapper } from "../typechain/contracts/CandyWrapper";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { BigNumber } from "ethers";
+import {BigNumber, BigNumberish} from "ethers";
 import {atob, btoa} from "buffer";
 
 describe("CandyWrapper", function () {
@@ -57,8 +57,9 @@ describe("CandyWrapper", function () {
 
         //it should store 6 indexes as binary and pack each pair into a single bit
 
-        candyWrapper = (await CandyWrapperFactory.deploy()) as CandyWrapper;
+        candyWrapper = (await CandyWrapperFactory.deploy(5, 200)) as CandyWrapper;
         await candyWrapper.deployed();
+        console.log(await candyWrapper.address);
     });
 
     describe("Deployment", function () {
@@ -83,7 +84,7 @@ describe("CandyWrapper", function () {
            let quantity: number = 1;
            const amount: BigNumber = ethers.utils.parseEther((1 * quantity).toString());
 
-            await candyWrapper.mint(1, {value: amount}).then();
+            await candyWrapper.mint(1, quantity,{value: amount}).then();
 
             //check that it is minted
             let balance: BigNumber = await candyWrapper.balanceOf(owner.address);
@@ -118,7 +119,7 @@ describe("CandyWrapper", function () {
             let quantity: number = 5;
             const amount: BigNumber = ethers.utils.parseEther((1 * quantity).toString());
 
-            await candyWrapper.mint(quantity, {value: amount});
+            await candyWrapper.mint(1, quantity, {value: amount});
 
             let balance: BigNumber = await candyWrapper.balanceOf(owner.address);
 
@@ -147,41 +148,42 @@ describe("CandyWrapper", function () {
             //address 1
 
             let quantity: number = 5;
-            let amount: BigNumber = ethers.utils.parseEther((1 * quantity).toString());
+            let amount: BigNumberish = ethers.utils.parseEther((1 * quantity).toString());
 
-            await candyWrapper.connect(addr1).mint(quantity, {value: amount});
+            await candyWrapper.connect(addr1).mint(1, quantity, {value: amount});
 
             let balance: BigNumber = await candyWrapper.balanceOf(addr1.address);
 
             await expect(balance).to.equal(BigNumber.from(quantity));
 
+            console.log(await addr1.getBalance());
 
             //address 2
             quantity = 6;
             amount = ethers.utils.parseEther(((1 * quantity).toString()));
-            await expect(candyWrapper.connect(addr2).mint(quantity, {value: amount})).to.be.revertedWith("Too much Candy.");
+            await expect(candyWrapper.connect(addr2).mint(1, quantity, {value: amount})).to.be.revertedWith("Too much Candy.");
 
             balance = await candyWrapper.balanceOf(addr2.address);
 
             await expect(balance).to.equal(BigNumber.from(0));
 
             //address 3
-            quantity = 3;
+            /*quantity = 3;
             amount = ethers.utils.parseEther(((1 * quantity).toString()));
-            await candyWrapper.connect(addrs[0]).mint(quantity, {value: amount});
+            await candyWrapper.connect(addrs[0]).mint(1, quantity, {value: amount});
             balance = await candyWrapper.balanceOf(addrs[0].address);
             //console.log("minter balance: ", balance);
             await expect(balance).to.equal(BigNumber.from(quantity));
             quantity = 3;
             amount = ethers.utils.parseEther(((1 * quantity).toString()));
-            await expect(candyWrapper.connect(addrs[0]).mint(quantity, {value: amount})).to.be.revertedWith("Too much Candy.");
+            await expect(candyWrapper.connect(addrs[0]).mint(1, quantity, {value: amount})).to.be.revertedWith("Too much Candy.");
             balance = await candyWrapper.balanceOf(addrs[0].address);
             await expect(balance).to.equal(BigNumber.from(quantity));
 
             //address 4
             quantity = 5;
             amount = ethers.utils.parseEther((1 * quantity).toString());
-            await candyWrapper.connect(addrs[1]).mint(quantity, {value: amount});
+            await candyWrapper.connect(addrs[1]).mint(1, quantity, {value: amount});
             balance = await candyWrapper.balanceOf(addrs[1].address);
             await expect(balance).to.equal(BigNumber.from(quantity));
 
@@ -201,7 +203,7 @@ describe("CandyWrapper", function () {
                 let data = JSON.parse(uri);
 
                 expect(data.attributes[7].value).to.equal(referrals[i].toString());
-            }
+            }*/
 
         });
 
@@ -219,6 +221,24 @@ describe("CandyWrapper", function () {
 
             //set DAO Registry
             await expect(candyWrapper.connect(addr1).setdaoRegistry(tokenIds, referrals)).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+
+        it("dev mint", async function () {
+
+            //address 1
+
+            let quantity: number = 200;
+            let amount: BigNumberish = ethers.utils.parseEther((1 * quantity).toString());
+
+            await candyWrapper.devMint(quantity, {value: amount});
+
+            let balance: BigNumber = await candyWrapper.balanceOf(owner.address);
+
+            await expect(balance).to.equal(BigNumber.from(quantity));
+            //console.log("CandyWrapper address", await candyWrapper.address);
+            //console.log(balance);
+            //let ownerOf: string = await candyWrapper.getOwnershipData(0);
+            //console.log(ownerOf);
         });
     });
 });

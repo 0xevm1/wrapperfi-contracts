@@ -242,11 +242,8 @@ contract CandyWrapper is ERC721A, Ownable {
     }
 
     function mint(uint8 control, uint8 quantity) external payable callerIsUser {
-        require(
-            ((totalSupply() + quantity) <= (candyCollection.AUTHORIZATION - candyCollection.reserve))
-            || (_numberMinted(msg.sender) + quantity <= candyCollection.maxPerAddressDuringMint),
-            "Too much Candy."
-        );
+        require((totalSupply() + quantity) <= (candyCollection.AUTHORIZATION - candyCollection.reserve), "Too much Candy.");
+        require(_numberMinted(msg.sender) + quantity <= candyCollection.maxPerAddressDuringMint, "Too much Candy.");
 
         if(control == 0){ //dutch auction mint
 
@@ -260,7 +257,7 @@ contract CandyWrapper is ERC721A, Ownable {
             refundIfOver(totalCost);
 
         } else if (control == 1){ //public sale mint
-            require(false, "Sale not active.");
+            //require(false, "Sale not active.");
             _safeMint(msg.sender, quantity);
             refundIfOver(candyCollection.publicPrice * quantity);
         } else if (control == 2){ //allowlist sale
@@ -271,9 +268,9 @@ contract CandyWrapper is ERC721A, Ownable {
             allowlist[msg.sender]--;
             _safeMint(msg.sender, 1);
             refundIfOver(price);
-        } else if (control == 3){ //reserved mint, can occur at any time
-
-        }
+        } /*else if (control == 3){ //reserved mint, can occur at any time
+            devMint(quantity);
+        } */
     }
 
     // For marketing etc.
@@ -282,14 +279,7 @@ contract CandyWrapper is ERC721A, Ownable {
             totalSupply() + quantity <= candyCollection.reserve,
             "Too much Candy before this round."
         );
-        require(
-            quantity % candyCollection.maxPerAddressDuringMint == 0,
-            "can only mint a multiple of the maxBatchSize"
-        );
-        uint256 numChunks = quantity / candyCollection.maxPerAddressDuringMint;
-        for (uint256 i = 0; i < numChunks; i++) {
-            _safeMint(msg.sender, candyCollection.maxPerAddressDuringMint);
-        }
+        _safeMint(msg.sender, quantity);
     }
 
     function isPublicSaleOn(
@@ -314,6 +304,7 @@ contract CandyWrapper is ERC721A, Ownable {
         candyCollection.publicSaleStartTime = publicSaleStartTime;
     }
 
+    //just epoch time in ms
     function setAuctionSaleStartTime(uint32 timestamp) external onlyOwner {
         candyCollection.auctionSaleStartTime = timestamp;
     }
@@ -363,8 +354,9 @@ contract CandyWrapper is ERC721A, Ownable {
     }
 
     function revealCandy() external onlyOwner {
-        candyCollection.reveal;
-        require(candyCollection.reveal, "Already revealed.");
+        require(candyCollection.reveal == false, "Already revealed.");
+        candyCollection.reveal = true;
+
     }
 
     /*** end rescue functions ***/

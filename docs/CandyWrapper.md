@@ -302,6 +302,30 @@ function isApprovedForAll(address owner, address operator) external view returns
 |---|---|---|
 | _0 | bool | undefined |
 
+### isPublicSaleOn
+
+```solidity
+function isPublicSaleOn(uint256 publicPriceWei, uint256 publicSaleKey, uint256 publicSaleStartTime) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| publicPriceWei | uint256 | undefined |
+| publicSaleKey | uint256 | undefined |
+| publicSaleStartTime | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
 ### mint
 
 ```solidity

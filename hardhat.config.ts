@@ -36,7 +36,9 @@ const chainIds = {
   binance: 56,
   binance_testnet: 97,
   ethw: 10001,
-  ethw_iceberg_testnet: 10002
+  ethw_iceberg_testnet: 10002,
+  zksync_era: 324,
+  zksync_era_testnet: 280
 };
 
 // Ensure that we have all the environment variables we need.
@@ -102,7 +104,13 @@ function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig 
       nodeUrl = "https://mainnet.ethereumpow.org";
       break;
     case "ethw_iceberg_testnet":
-      nodeUrl = "https://iceberg.ethereumpow.org"
+      nodeUrl = "https://iceberg.ethereumpow.org";
+      break;
+    case "zksync_era":
+      nodeUrl = "https://mainnet.era.zksync.io";
+      break;
+    case "zksync_era_testnet":
+      nodeUrl = "https://testnet.era.zksync.dev";
       break;
   }
 
@@ -200,7 +208,9 @@ if (testPrivateKey) {
     binance: createTestnetConfig("binance"),
     binance_testnet: createTestnetConfig("binance_testnet"),
     ethw: createTestnetConfig("ethw"),
-    ethw_iceberg_test: createTestnetConfig("ethw_iceberg_testnet")
+    ethw_iceberg_test: createTestnetConfig("ethw_iceberg_testnet"),
+    zksync_era: createTestnetConfig("zksync_era"),
+    zksync_era_testnet: createTestnetConfig("zksync_era_testnet")
   };
 }
 

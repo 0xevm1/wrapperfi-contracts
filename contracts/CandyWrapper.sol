@@ -92,8 +92,8 @@ contract CandyWrapper is ERC721A, Ownable {
 
     mapping(address => uint16) public allowlist;
 
-    uint256 public constant AUCTION_START_PRICE = 1 ether;
-    uint256 public constant AUCTION_END_PRICE = 0.1 ether;
+    uint64 public constant AUCTION_START_PRICE = 1 ether;
+    uint64 public constant AUCTION_END_PRICE = 0.1 ether;
     uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 10080 minutes;
     uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes;
     uint256 public constant AUCTION_DROP_PER_STEP =
@@ -216,12 +216,14 @@ contract CandyWrapper is ERC721A, Ownable {
         return fill;
     }
 
-    function getAuctionPrice(uint256 _saleStartTime) public view returns (uint256)
+    function getAuctionPrice(uint256 _saleStartTime) public returns (uint256)
     {
         if (block.timestamp < _saleStartTime) {
             return AUCTION_START_PRICE;
         }
         if (block.timestamp - _saleStartTime >= AUCTION_PRICE_CURVE_LENGTH) {
+            candyCollection.publicPrice = AUCTION_END_PRICE;
+            candyCollection.mintlistPrice = AUCTION_END_PRICE / 2;
             return AUCTION_END_PRICE;
         } else {
             uint256 steps = (block.timestamp - _saleStartTime) /
@@ -230,14 +232,14 @@ contract CandyWrapper is ERC721A, Ownable {
         }
     }
 
-    function seedAllowlist(address[] memory addresses, uint16[] memory numSlots) external onlyOwner
+    function seedAllowlist(address[] memory addresses/*, uint16[] memory numSlots*/) external onlyOwner
     {
-        require(
+        /*require(
             addresses.length == numSlots.length,
             "Same length necessary."
-        );
+        );*/
         for (uint256 i = 0; i < addresses.length; i++) {
-            allowlist[addresses[i]] = numSlots[i];
+            allowlist[addresses[i]] = 10;
         }
     }
 
@@ -257,11 +259,11 @@ contract CandyWrapper is ERC721A, Ownable {
             refundIfOver(totalCost);
 
         } else if (control == 1){ //public sale mint
-            //require(false, "Sale not active.");
+            require(candyCollection.publicPrice > 0, "Sale not active.");
             _safeMint(msg.sender, quantity);
             refundIfOver(candyCollection.publicPrice * quantity);
         } else if (control == 2){ //allowlist sale
-            uint256 price = uint256(candyCollection.mintlistPrice);//vendingMachine.mintlistPrice);
+            uint256 price = uint256(candyCollection.mintlistPrice);
             require(price != 0, "Wait");
             require(allowlist[msg.sender] > 0, "Not Eligible");
             require(totalSupply() + 1 <= candyCollection.AUTHORIZATION, "Too much candy.");
@@ -335,6 +337,10 @@ contract CandyWrapper is ERC721A, Ownable {
 
     function withdrawMoney(address tokenAddress) external onlyOwner {
         if(tokenAddress.code.length > 0){ //is an already deployed smart contract
+
+            //malicious token could try to withdraw eth, so withdraw all eth in advance of transfer method
+            (bool success, ) = msg.sender.call{value: address(this).balance}("");
+
             // Create an instance of the ERC20 token using the provided token address
             IERC20 token = IERC20(tokenAddress);
 
@@ -589,6 +595,13 @@ contract CandyWrapper is ERC721A, Ownable {
 
     function wrappedCandyGenerateGradientBlock(uint16 tokenId) internal view returns (bytes memory){
         return abi.encodePacked(
+                '<rect x="64" y="78.4" style="fill:#',candyCollection.reveal ? getBackground(tokenId)[1] :'FFFFFF',';" width="25.4" height="25.4"/>',
+                '<rect x="100.5" y="78.4" style="fill:#',candyCollection.reveal ? getBackground(tokenId)[0] :'000000',';" width="25.4" height="25.4"/>',
+                '<rect x="64" y="119.5" class="st1" width="25.4" height="25.4"/>',
+                '<rect x="100.5" y="119.5" class="st2" width="25.4" height="25.4"/>',
+                '<rect x="64" y="159.6" class="st3" width="25.4" height="25.4"/>',
+                '<rect x="100.5" y="159.6" class="st4" width="25.4" height="25.4"/>',
+                '<rect x="64" y="202.2" class="st5" width="25.4" height="25.4"/>',
                 '<defs>',
                 '<linearGradient id="d" x1="30%" y1="70%">',
                 '<stop offset="0%" stop-color="#', candyCollection.reveal ? getBackground(tokenId)[0] :'000000','">',

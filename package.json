@@ -9,7 +9,6 @@
     "compile:force": "hardhat compile --force",
     "deploy": "hardhat run --network localhost scripts/0001-deploy.ts",
     "test": "hardhat test",
-    "contract-size": "yarn run hardhat size-contracts",
     "prepare": "husky install"
   },
   "lint-staged": {

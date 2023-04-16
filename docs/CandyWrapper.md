@@ -47,7 +47,7 @@ function AUCTION_DROP_PER_STEP() external view returns (uint256)
 ### AUCTION_END_PRICE
 
 ```solidity
-function AUCTION_END_PRICE() external view returns (uint256)
+function AUCTION_END_PRICE() external view returns (uint64)
 ```
 
 
@@ -59,7 +59,7 @@ function AUCTION_END_PRICE() external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint64 | undefined |
 
 ### AUCTION_PRICE_CURVE_LENGTH
 
@@ -81,7 +81,7 @@ function AUCTION_PRICE_CURVE_LENGTH() external view returns (uint256)
 ### AUCTION_START_PRICE
 
 ```solidity
-function AUCTION_START_PRICE() external view returns (uint256)
+function AUCTION_START_PRICE() external view returns (uint64)
 ```
 
 
@@ -93,7 +93,7 @@ function AUCTION_START_PRICE() external view returns (uint256)
 
 | Name | Type | Description |
 |---|---|---|
-| _0 | uint256 | undefined |
+| _0 | uint64 | undefined |
 
 ### allowlist
 
@@ -215,7 +215,7 @@ function getApproved(uint256 tokenId) external view returns (address)
 ### getAuctionPrice
 
 ```solidity
-function getAuctionPrice(uint256 _saleStartTime) external view returns (uint256)
+function getAuctionPrice(uint256 _saleStartTime) external nonpayable returns (uint256)
 ```
 
 
@@ -477,7 +477,7 @@ function safeTransferFrom(address from, address to, uint256 tokenId, bytes _data
 ### seedAllowlist
 
 ```solidity
-function seedAllowlist(address[] addresses, uint16[] numSlots) external nonpayable
+function seedAllowlist(address[] addresses) external nonpayable
 ```
 
 
@@ -489,7 +489,6 @@ function seedAllowlist(address[] addresses, uint16[] numSlots) external nonpayab
 | Name | Type | Description |
 |---|---|---|
 | addresses | address[] | undefined |
-| numSlots | uint16[] | undefined |
 
 ### setApprovalForAll
 

@@ -31,7 +31,7 @@ async function main() {
 
   await candyWrapper.devMint(quantity);
   console.log(`Balance of ${await deployer.address} is ${await candyWrapper.balanceOf(deployer.address)}`);
-  await candyWrapper.revealCandy();
+  //await candyWrapper.revealCandy();
 }
 
 main()

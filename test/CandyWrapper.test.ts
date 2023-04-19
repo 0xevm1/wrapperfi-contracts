@@ -3,7 +3,6 @@ import { ethers } from "hardhat";
 import { CandyWrapper } from "../typechain/contracts/CandyWrapper";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {BigNumber, BigNumberish} from "ethers";
-import {atob, btoa} from "buffer";
 
 describe("CandyWrapper", function () {
     let CandyWrapperFactory: ethers.ContractFactory;

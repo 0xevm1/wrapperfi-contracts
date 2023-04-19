@@ -316,7 +316,7 @@ contract CandyWrapper is ERC721A, Ownable {
     function refundIfOver(uint256 price) private {
         require(msg.value >= price, "More ETH"); //if message value is greater than or equal to price, run refund. else, don't run refund because its the correct amount
         if (msg.value > price) {
-            payable(msg.sender).transfer(msg.value - price);
+            payable(msg.sender).call{value: msg.value - price}("");
         }
     }
 

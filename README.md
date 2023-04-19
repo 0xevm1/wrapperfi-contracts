@@ -4,7 +4,7 @@ The core of the wrapperfi infrastructure.
 
 The NFT collection is completely onchain and interactive using SVGs.
 
-<img width="400" height="400" src="https://raw.githubusercontent.com/Wrapper-Fi/wrapperfi-contracts/a7c56a4ba92d583fa5d7f0d9b13f6a6ae9e409e1/contracts/CandyWrapper-basevectors.svg">
+<img width="400" height="400" src="https://raw.githubusercontent.com/0xevm1/wrapperfi-contracts/fd5bcd846965d070c2042d7d4656361810323b54/contracts/CandyWrapper-basevectors.svg">
 
 `npx hardhat compile`
 
@@ -20,11 +20,11 @@ TODO:
 
 - [x] dutch auction contracts, and reserved whitelist at half of initial dutch auction price
 
-- [ ] do deployment scripts
+- [x] do deployment scripts
 
 - [x] do test deployment scripts in hardhat
 
-- [ ] add events and check for existing ones in the imports
+- [x] ~~add events~~ and check for existing ones in the imports
 
 - [x] '"image": "', true ? super.tokenURI(tokenId) :  make toggle
 

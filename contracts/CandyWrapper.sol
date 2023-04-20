@@ -119,18 +119,6 @@ contract CandyWrapper is ERC721A, Ownable {
         uint256 key = uint256(keccak256(abi.encodePacked(uint256(0x40)))) - 1;
 
         candyCollection.maxPerAddressDuringMint = maxBatchSize_;
-
-        //configure dutch auction here, hardcode configurations
-        //add these to struct, set them in constructor,
-        //no getters just make client side follow the same rules
-        /*candyCollection.AUCTION_START_PRICE = 1 ether;
-        candyCollection.AUCTION_END_PRICE = 0.15 ether;
-        candyCollection.AUCTION_PRICE_CURVE_LENGTH = 340 minutes;
-        candyCollection.AUCTION_DROP_INTERVAL = 20 minutes;
-        candyCollection.AUCTION_DROP_PER_STEP = uint96(
-            (candyCollection.AUCTION_START_PRICE - candyCollection.AUCTION_END_PRICE) /
-            (candyCollection.AUCTION_PRICE_CURVE_LENGTH / candyCollection.AUCTION_DROP_INTERVAL));*/
-
         //configure allowlist here, the whitelist, pass into constructor no setter
 
         candyCollection.AUTHORIZATION = uint16(key & 0xffffffff); //AUTHORIZATION variable
